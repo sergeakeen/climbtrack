@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Climbing Workout Tracker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Include the CSS -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Climbing Workout Tracker</h1>
+
+    <!-- Calendar Section -->
+    <div class="calendar-container">
+      <div class="calendar-header">
+        <button id="prev-month" class="month-nav">&lt;</button>
+        <h2 id="month-year"></h2>
+        <button id="next-month" class="month-nav">&gt;</button>
+      </div>
+      <div id="calendar"></div>
+    </div>
+
+    <!-- Monthly Statistics -->
+    <div class="stats-container">
+      <h2>Monthly Statistics</h2>
+      <div class="tabs">
+        <button class="tab-button active" data-tab="bouldering">Bouldering</button>
+        <button class="tab-button" data-tab="sports-climbing">Sports Climbing</button>
+      </div>
+      <div class="tab-content active" id="bouldering-stats">
+        <div id="bouldering-stats-content"></div>
+      </div>
+      <div class="tab-content" id="sports-climbing-stats">
+        <div id="sports-climbing-stats-content"></div>
+      </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- Workout Type Modal -->
+    <div id="workout-type-modal" class="modal">
+      <div class="modal-content">
+        <span class="close-button" data-close="workout-type-modal">&times;</span>
+        <h2>Select Workout Type</h2>
+        <div class="modal-buttons">
+          <button id="select-bouldering" class="modal-button">Bouldering</button>
+          <button id="select-sports-climbing" class="modal-button">Sports Climbing</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Grade Selection Modal -->
+    <div id="grade-selection-modal" class="modal">
+      <div class="modal-content">
+        <span class="close-button" data-close="grade-selection-modal">&times;</span>
+        <h2 id="grade-modal-title"></h2>
+        <div id="grade-list" class="grade-list"></div>
+        <button id="save-workout-button" class="save-button">Save Workout</button>
+      </div>
+    </div>
+
+    <!-- Workout Summary Modal -->
+    <div id="workout-summary-modal" class="modal">
+      <div class="modal-content">
+        <span class="close-button" data-close="workout-summary-modal">&times;</span>
+        <h2>Workout Summary</h2>
+        <div id="workout-summary-content"></div>
+        <button id="add-another-workout-button" class="modal-button">Add Another Workout</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Include the JavaScript -->
+  <script src="script.js"></script>
+</body>
+</html>

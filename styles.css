@@ -328,3 +328,31 @@ h3 {
     margin: 100px auto;
   }
 }
+/* General Styles */
+
+
+/* Add to Home Screen Button */
+#a2hsButton {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #6b46c1;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+#a2hsButton:hover {
+  background-color: #5a38a6;
+  transform: translateY(-3px);
+}
+
+#a2hsButton:active {
+  background-color: #4b2d8c;
+  transform: translateY(0);
+}

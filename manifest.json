@@ -1,19 +1,19 @@
 {
     "name": "Climbing Workout Tracker",
     "short_name": "ClimbTracker",
-    "start_url": ".",
+    "start_url": "https://sergeakeen.github.io/climbtrack/",
     "display": "standalone",
     "background_color": "#ffffff",
     "theme_color": "#6b46c1",
     "orientation": "portrait",
     "icons": [
       {
-        "src": "icons/icon-192x192.png",
+        "src": "icons/icon192.png",
         "type": "image/png",
         "sizes": "192x192"
       },
       {
-        "src": "icons/icon-512x512.png",
+        "src": "icons/icon512.png",
         "type": "image/png",
         "sizes": "512x512"
       }

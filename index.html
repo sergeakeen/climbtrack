@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#6b46c1">
+
   <meta charset="UTF-8">
   <title>Climbing Workout Tracker</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -78,5 +81,20 @@
 
   <!-- Include the JavaScript -->
   <script src="script.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('service-worker.js').then(
+          registration => {
+            console.log('Service Worker registered with scope:', registration.scope);
+          },
+          err => {
+            console.log('Service Worker registration failed:', err);
+          }
+        );
+      });
+    }
+  </script>
+  
 </body>
 </html>

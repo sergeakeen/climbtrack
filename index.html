@@ -15,6 +15,17 @@
 <body>
   <div class="container">
     <h1>Climbing Workout Tracker</h1>
+
+    <!-- Info Button for Bouldering Grade Conversion -->
+    <button id="openDialog" class="info-button">
+      <svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"></circle>
+        <line x1="12" y1="16" x2="12" y2="12" stroke="currentColor" stroke-width="2"></line>
+        <line x1="12" y1="8" x2="12.01" y2="8" stroke="currentColor" stroke-width="2"></line>
+      </svg>
+      Bouldering Grade Conversion
+    </button>
+
     <button id="a2hsButton" style="display:none;">Add to Home Screen</button>
 
     <!-- Calendar Section -->
@@ -78,6 +89,25 @@
         <button id="add-another-workout-button" class="modal-button">Add Another Workout</button>
       </div>
     </div>
+
+    <!-- Bouldering Grade Conversion Dialog -->
+    <div id="dialog" class="dialog">
+      <div class="dialog-content">
+        <h2>Bouldering Grade Conversion</h2>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>American</th>
+                <th>French</th>
+              </tr>
+            </thead>
+            <tbody id="gradeTable"></tbody>
+          </table>
+        </div>
+        <button id="closeDialog" class="close-button">Close</button>
+      </div>
+    </div>
   </div>
 
   <!-- Include the JavaScript -->
@@ -125,6 +155,70 @@
           deferredPrompt = null; // Reset the prompt
         });
       });
+    });
+  </script>
+
+  <!-- Dialog Script -->
+  <script>
+    // Grade Conversion Data
+    const gradeConversionTable = [
+      { american: "V0", french: "4" },
+      { american: "V1", french: "5" },
+      { american: "V2", french: "5+" },
+      { american: "V3", french: "6A-6A+" },
+      { american: "V4", french: "6B-6B+" },
+      { american: "V5", french: "6C-6C+" },
+      { american: "V6", french: "7A" },
+      { american: "V7", french: "7A+" },
+      { american: "V8", french: "7B-7B+" },
+      { american: "V9", french: "7C" },
+      { american: "V10", french: "7C+" },
+      { american: "V11", french: "8A" },
+      { american: "V12", french: "8A+" },
+      { american: "V13", french: "8B" },
+      { american: "V14", french: "8B+" },
+      { american: "V15", french: "8C" },
+      { american: "V16", french: "8C+" },
+      { american: "V17", french: "9A" },
+    ];
+
+    function populateGradeTable() {
+      const tableBody = document.getElementById('gradeTable');
+      tableBody.innerHTML = ''; // Clear existing content
+      gradeConversionTable.forEach(grade => {
+        const row = document.createElement('tr');
+        const americanCell = document.createElement('td');
+        const frenchCell = document.createElement('td');
+
+        americanCell.textContent = grade.american;
+        frenchCell.textContent = grade.french;
+
+        row.appendChild(americanCell);
+        row.appendChild(frenchCell);
+        tableBody.appendChild(row);
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const openButton = document.getElementById('openDialog');
+      const closeButton = document.getElementById('closeDialog');
+      const dialog = document.getElementById('dialog');
+
+      openButton.addEventListener('click', () => {
+        dialog.style.display = 'flex';
+      });
+
+      closeButton.addEventListener('click', () => {
+        dialog.style.display = 'none';
+      });
+
+      dialog.addEventListener('click', (e) => {
+        if (e.target === dialog) {
+          dialog.style.display = 'none';
+        }
+      });
+
+      populateGradeTable();
     });
   </script>
 </body>

@@ -24,6 +24,11 @@ h2 {
   margin-bottom: 10px;
 }
 
+h3 {
+  color: #6b46c1;
+  margin-top: 20px;
+}
+
 /* Calendar Styles */
 .calendar-container {
   margin-bottom: 20px;

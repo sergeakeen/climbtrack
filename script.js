@@ -11,6 +11,17 @@ const sportsClimbingGrades = [
   "9a", "9a+", "9b", "9b+", "9c"
 ];
 
+// Grade values for average calculation
+const boulderingGradeValues = {};
+boulderingGrades.forEach((grade, index) => {
+  boulderingGradeValues[grade] = index + 1;
+});
+
+const sportsClimbingGradeValues = {};
+sportsClimbingGrades.forEach((grade, index) => {
+  sportsClimbingGradeValues[grade] = index + 1;
+});
+
 let selectedDate = new Date();
 let currentMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
 let workouts = [];
@@ -213,12 +224,14 @@ function setupEventListeners() {
 
 // Open Grade Selection Modal
 function openGradeSelectionModal() {
-  currentWorkout = {
-    id: Date.now().toString(),
-    date: selectedDate,
-    type: selectedWorkoutType,
-    grades: []
-  };
+  if (!editingWorkoutId) {
+    currentWorkout = {
+      id: Date.now().toString(),
+      date: selectedDate,
+      type: selectedWorkoutType,
+      grades: []
+    };
+  }
 
   const gradeModalTitle = document.getElementById('grade-modal-title');
   gradeModalTitle.textContent = `${selectedWorkoutType} Workout`;
@@ -228,12 +241,12 @@ function openGradeSelectionModal() {
 
   const grades = selectedWorkoutType === 'Bouldering' ? boulderingGrades : sportsClimbingGrades;
 
-  grades.forEach(grade => {
+  grades.forEach(gradeName => {
     const gradeItem = document.createElement('div');
     gradeItem.classList.add('grade-item');
 
     const gradeLabel = document.createElement('span');
-    gradeLabel.textContent = grade;
+    gradeLabel.textContent = gradeName;
     gradeItem.appendChild(gradeLabel);
 
     const gradeControls = document.createElement('div');
@@ -246,20 +259,13 @@ function openGradeSelectionModal() {
     const flashButton = document.createElement('button');
     flashButton.classList.add('split-button-half');
     flashButton.textContent = 'Flash';
-    flashButton.addEventListener('click', () => {
-      selectGradeType(grade, 'flash', flashButton, onsiteButton);
-    });
 
     const onsiteButton = document.createElement('button');
     onsiteButton.classList.add('split-button-half');
     onsiteButton.textContent = 'Onsite';
-    onsiteButton.addEventListener('click', () => {
-      selectGradeType(grade, 'onsite', onsiteButton, flashButton);
-    });
 
     splitButton.appendChild(flashButton);
     splitButton.appendChild(onsiteButton);
-
     gradeControls.appendChild(splitButton);
 
     // Count Controls
@@ -269,84 +275,101 @@ function openGradeSelectionModal() {
     const minusButton = document.createElement('button');
     minusButton.classList.add('count-button');
     minusButton.textContent = '-';
-    minusButton.addEventListener('click', () => {
-      adjustGradeCount(grade, -1);
-    });
-    countControls.appendChild(minusButton);
 
     const countDisplay = document.createElement('span');
     countDisplay.classList.add('count-display');
     countDisplay.textContent = '0';
-    countControls.appendChild(countDisplay);
 
     const plusButton = document.createElement('button');
     plusButton.classList.add('count-button');
     plusButton.textContent = '+';
-    plusButton.addEventListener('click', () => {
-      adjustGradeCount(grade, 1);
-    });
+
+    countControls.appendChild(minusButton);
+    countControls.appendChild(countDisplay);
     countControls.appendChild(plusButton);
 
     gradeControls.appendChild(countControls);
-
     gradeItem.appendChild(gradeControls);
     gradeList.appendChild(gradeItem);
 
-    // Store references for updates
-    currentWorkout.grades.push({
-      grade: grade,
+    // Initialize grade data
+    let gradeData = {
+      grade: gradeName,
       type: null, // 'flash' or 'onsite'
-      count: 0,
-      elements: {
-        flashButton: flashButton,
-        onsiteButton: onsiteButton,
-        countDisplay: countDisplay
+      count: 0
+    };
+
+    currentWorkout.grades.push(gradeData);
+
+    // Event Listeners
+    flashButton.addEventListener('click', () => {
+      if (gradeData.type === 'flash') {
+        gradeData.type = null;
+        flashButton.classList.remove('selected');
+      } else {
+        gradeData.type = 'flash';
+        flashButton.classList.add('selected');
+        onsiteButton.classList.remove('selected');
+        if (gradeData.count < 1) {
+          gradeData.count = 1;
+          countDisplay.textContent = gradeData.count;
+        }
       }
     });
+
+    onsiteButton.addEventListener('click', () => {
+      if (gradeData.type === 'onsite') {
+        gradeData.type = null;
+        onsiteButton.classList.remove('selected');
+      } else {
+        gradeData.type = 'onsite';
+        onsiteButton.classList.add('selected');
+        flashButton.classList.remove('selected');
+        if (gradeData.count < 1) {
+          gradeData.count = 1;
+          countDisplay.textContent = gradeData.count;
+        }
+      }
+    });
+
+    minusButton.addEventListener('click', () => {
+      gradeData.count = Math.max(gradeData.type ? 1 : 0, gradeData.count - 1);
+      countDisplay.textContent = gradeData.count;
+    });
+
+    plusButton.addEventListener('click', () => {
+      gradeData.count += 1;
+      countDisplay.textContent = gradeData.count;
+    });
+
+    // If editing, load existing data
+    if (editingWorkoutId) {
+      const existingGrade = currentWorkout.grades.find(g => g.grade === gradeName);
+      if (existingGrade) {
+        gradeData.count = existingGrade.count;
+        gradeData.type = existingGrade.type;
+        countDisplay.textContent = gradeData.count;
+        if (gradeData.type === 'flash') {
+          flashButton.classList.add('selected');
+        } else if (gradeData.type === 'onsite') {
+          onsiteButton.classList.add('selected');
+        }
+      }
+    }
   });
 
   openModal('grade-selection-modal');
-}
-
-// Handle Grade Type Selection
-function selectGradeType(grade, type, selectedButton, otherButton) {
-  const gradeObj = currentWorkout.grades.find(g => g.grade === grade);
-  if (gradeObj) {
-    // Toggle selection
-    if (gradeObj.type === type) {
-      // Deselect if already selected
-      gradeObj.type = null;
-      selectedButton.classList.remove('selected');
-    } else {
-      gradeObj.type = type;
-      selectedButton.classList.add('selected');
-      otherButton.classList.remove('selected');
-      // Set count to at least 1
-      if (gradeObj.count < 1) {
-        gradeObj.count = 1;
-        gradeObj.elements.countDisplay.textContent = gradeObj.count;
-      }
-    }
-  }
-}
-
-// Adjust Grade Count
-function adjustGradeCount(grade, delta) {
-  const gradeObj = currentWorkout.grades.find(g => g.grade === grade);
-  if (gradeObj) {
-    let newCount = gradeObj.count + delta;
-    if (newCount < 0) newCount = 0;
-    // If type is selected (flash or onsite), count cannot be less than 1
-    if (gradeObj.type && newCount < 1) newCount = 1;
-    gradeObj.count = newCount;
-    gradeObj.elements.countDisplay.textContent = gradeObj.count;
-  }
 }
 
 // Save Workout
 function saveWorkout() {
   // Filter out grades with zero count
   currentWorkout.grades = currentWorkout.grades.filter(g => g.count > 0);
+
+  if (currentWorkout.grades.length === 0) {
+    alert('Please add at least one climb to save the workout.');
+    return;
+  }
 
   if (editingWorkoutId) {
     workouts = workouts.map(w => w.id === editingWorkoutId ? currentWorkout : w);
@@ -443,108 +466,8 @@ function editWorkout(workout) {
   editingWorkoutId = workout.id;
   selectedWorkoutType = workout.type;
 
-  const gradeModalTitle = document.getElementById('grade-modal-title');
-  gradeModalTitle.textContent = `${selectedWorkoutType} Workout`;
-
-  const gradeList = document.getElementById('grade-list');
-  gradeList.innerHTML = '';
-
-  const grades = selectedWorkoutType === 'Bouldering' ? boulderingGrades : sportsClimbingGrades;
-
-  grades.forEach(grade => {
-    const gradeItem = document.createElement('div');
-    gradeItem.classList.add('grade-item');
-
-    const gradeLabel = document.createElement('span');
-    gradeLabel.textContent = grade;
-    gradeItem.appendChild(gradeLabel);
-
-    const gradeControls = document.createElement('div');
-    gradeControls.classList.add('grade-controls');
-
-    // Split Button for Flash/Onsite
-    const splitButton = document.createElement('div');
-    splitButton.classList.add('split-button');
-
-    const flashButton = document.createElement('button');
-    flashButton.classList.add('split-button-half');
-    flashButton.textContent = 'Flash';
-    flashButton.addEventListener('click', () => {
-      selectGradeType(grade, 'flash', flashButton, onsiteButton);
-    });
-
-    const onsiteButton = document.createElement('button');
-    onsiteButton.classList.add('split-button-half');
-    onsiteButton.textContent = 'Onsite';
-    onsiteButton.addEventListener('click', () => {
-      selectGradeType(grade, 'onsite', onsiteButton, flashButton);
-    });
-
-    splitButton.appendChild(flashButton);
-    splitButton.appendChild(onsiteButton);
-
-    gradeControls.appendChild(splitButton);
-
-    // Count Controls
-    const countControls = document.createElement('div');
-    countControls.classList.add('count-controls');
-
-    const minusButton = document.createElement('button');
-    minusButton.classList.add('count-button');
-    minusButton.textContent = '-';
-    minusButton.addEventListener('click', () => {
-      adjustGradeCount(grade, -1);
-    });
-    countControls.appendChild(minusButton);
-
-    const countDisplay = document.createElement('span');
-    countDisplay.classList.add('count-display');
-    countDisplay.textContent = '0';
-    countControls.appendChild(countDisplay);
-
-    const plusButton = document.createElement('button');
-    plusButton.classList.add('count-button');
-    plusButton.textContent = '+';
-    plusButton.addEventListener('click', () => {
-      adjustGradeCount(grade, 1);
-    });
-    countControls.appendChild(plusButton);
-
-    gradeControls.appendChild(countControls);
-
-    gradeItem.appendChild(gradeControls);
-    gradeList.appendChild(gradeItem);
-
-    // Store references for updates
-    const existingGrade = currentWorkout.grades.find(g => g.grade === grade);
-    if (existingGrade) {
-      if (existingGrade.type === 'flash') {
-        flashButton.classList.add('selected');
-      } else if (existingGrade.type === 'onsite') {
-        onsiteButton.classList.add('selected');
-      }
-      countDisplay.textContent = existingGrade.count;
-      existingGrade.elements = {
-        flashButton: flashButton,
-        onsiteButton: onsiteButton,
-        countDisplay: countDisplay
-      };
-    } else {
-      currentWorkout.grades.push({
-        grade: grade,
-        type: null,
-        count: 0,
-        elements: {
-          flashButton: flashButton,
-          onsiteButton: onsiteButton,
-          countDisplay: countDisplay
-        }
-      });
-    }
-  });
-
   closeModal('workout-summary-modal');
-  openModal('grade-selection-modal');
+  openGradeSelectionModal();
 }
 
 // Delete Workout
@@ -577,83 +500,82 @@ function updateStatistics() {
   boulderingStatsEl.innerHTML = '';
   sportsClimbingStatsEl.innerHTML = '';
 
-  const monthlyStats = calculateMonthlyStats();
+  const monthlyStats = calculateMonthlyStats(currentMonth.getFullYear(), currentMonth.getMonth());
 
-  // Bouldering Stats
-  if (monthlyStats.Bouldering) {
-    for (const [grade, count] of Object.entries(monthlyStats.Bouldering.gradeCounts)) {
-      const statItem = document.createElement('div');
-      statItem.classList.add('grade-item');
-      statItem.innerHTML = `<span>${grade}</span><span>${count}</span>`;
-      boulderingStatsEl.appendChild(statItem);
+  // Get previous month stats
+  const prevMonthDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1);
+  const prevMonthStats = calculateMonthlyStats(prevMonthDate.getFullYear(), prevMonthDate.getMonth());
+
+  // Function to display stats
+  function displayStats(type, statsEl) {
+    if (monthlyStats[type] && monthlyStats[type].totalRoutes > 0) {
+      const totalRoutes = document.createElement('p');
+      totalRoutes.innerHTML = `Total routes climbed: <strong>${monthlyStats[type].totalRoutes}</strong>`;
+      statsEl.appendChild(totalRoutes);
+
+      const hardestFlash = document.createElement('p');
+      hardestFlash.innerHTML = `Hardest Flash: <strong>${monthlyStats.hardestFlash[type] || 'N/A'}</strong>`;
+      statsEl.appendChild(hardestFlash);
+
+      const hardestOnsite = document.createElement('p');
+      hardestOnsite.innerHTML = `Hardest Onsite: <strong>${monthlyStats.hardestOnsite[type] || 'N/A'}</strong>`;
+      statsEl.appendChild(hardestOnsite);
+
+      const hardestRoute = document.createElement('p');
+      hardestRoute.innerHTML = `Hardest Route: <strong>${monthlyStats[type].hardestRoute || 'N/A'}</strong>`;
+      statsEl.appendChild(hardestRoute);
+
+      const averageGrade = document.createElement('p');
+      averageGrade.innerHTML = `Average Grade: <strong>${monthlyStats[type].averageGrade || 'N/A'}</strong>`;
+      statsEl.appendChild(averageGrade);
+
+      // Bar Chart
+      renderGradeDistributionChart(type);
+
+      // Comparison to Previous Month
+      displayComparison(type, statsEl);
+    } else {
+      const noData = document.createElement('p');
+      noData.textContent = 'No data for this month.';
+      statsEl.appendChild(noData);
     }
-
-    const totalRoutes = document.createElement('p');
-    totalRoutes.innerHTML = `Total routes climbed: <strong>${monthlyStats.Bouldering.totalRoutes}</strong>`;
-    boulderingStatsEl.appendChild(totalRoutes);
-
-    const hardestRoute = document.createElement('p');
-    hardestRoute.innerHTML = `Hardest route: <strong>${monthlyStats.Bouldering.hardestRoute || 'N/A'}</strong>`;
-    boulderingStatsEl.appendChild(hardestRoute);
-
-    const hardestFlash = document.createElement('p');
-    hardestFlash.innerHTML = `Hardest Flash: <strong>${monthlyStats.hardestFlash.Bouldering || 'N/A'}</strong>`;
-    boulderingStatsEl.appendChild(hardestFlash);
-
-    const hardestOnsite = document.createElement('p');
-    hardestOnsite.innerHTML = `Hardest Onsite: <strong>${monthlyStats.hardestOnsite.Bouldering || 'N/A'}</strong>`;
-    boulderingStatsEl.appendChild(hardestOnsite);
   }
 
-  // Sports Climbing Stats
-  if (monthlyStats['Sports Climbing']) {
-    for (const [grade, count] of Object.entries(monthlyStats['Sports Climbing'].gradeCounts)) {
-      const statItem = document.createElement('div');
-      statItem.classList.add('grade-item');
-      statItem.innerHTML = `<span>${grade}</span><span>${count}</span>`;
-      sportsClimbingStatsEl.appendChild(statItem);
-    }
-
-    const totalRoutes = document.createElement('p');
-    totalRoutes.innerHTML = `Total routes climbed: <strong>${monthlyStats['Sports Climbing'].totalRoutes}</strong>`;
-    sportsClimbingStatsEl.appendChild(totalRoutes);
-
-    const hardestRoute = document.createElement('p');
-    hardestRoute.innerHTML = `Hardest route: <strong>${monthlyStats['Sports Climbing'].hardestRoute || 'N/A'}</strong>`;
-    sportsClimbingStatsEl.appendChild(hardestRoute);
-
-    const hardestFlash = document.createElement('p');
-    hardestFlash.innerHTML = `Hardest Flash: <strong>${monthlyStats.hardestFlash['Sports Climbing'] || 'N/A'}</strong>`;
-    sportsClimbingStatsEl.appendChild(hardestFlash);
-
-    const hardestOnsite = document.createElement('p');
-    hardestOnsite.innerHTML = `Hardest Onsite: <strong>${monthlyStats.hardestOnsite['Sports Climbing'] || 'N/A'}</strong>`;
-    sportsClimbingStatsEl.appendChild(hardestOnsite);
-  }
+  displayStats('Bouldering', boulderingStatsEl);
+  displayStats('Sports Climbing', sportsClimbingStatsEl);
 }
 
-// Calculate Monthly Stats
-function calculateMonthlyStats() {
+// Modified calculateMonthlyStats function
+function calculateMonthlyStats(year, month) {
   const stats = {
-    Bouldering: { gradeCounts: {}, totalRoutes: 0, hardestRoute: '' },
-    'Sports Climbing': { gradeCounts: {}, totalRoutes: 0, hardestRoute: '' },
+    Bouldering: {
+      gradeCounts: {},
+      totalRoutes: 0,
+      hardestRoute: '',
+      totalGradeValue: 0,
+      totalGradeCount: 0,
+      averageGradeValue: 0,
+      averageGrade: ''
+    },
+    'Sports Climbing': {
+      gradeCounts: {},
+      totalRoutes: 0,
+      hardestRoute: '',
+      totalGradeValue: 0,
+      totalGradeCount: 0,
+      averageGradeValue: 0,
+      averageGrade: ''
+    },
     hardestFlash: { Bouldering: '', 'Sports Climbing': '' },
     hardestOnsite: { Bouldering: '', 'Sports Climbing': '' }
   };
 
-  const year = currentMonth.getFullYear();
-  const month = currentMonth.getMonth();
-
   const startOfMonth = new Date(year, month, 1);
   const endOfMonth = new Date(year, month + 1, 0);
 
-  const monthWorkouts = workouts.filter(w => w.date >= startOfMonth && w.date <= endOfMonth);
+  const monthWorkouts = workouts.filter(w => isSameDateMonth(w.date, startOfMonth, endOfMonth));
 
   monthWorkouts.forEach(workout => {
-    if (!stats[workout.type]) {
-      stats[workout.type] = { gradeCounts: {}, totalRoutes: 0, hardestRoute: '' };
-    }
-
     workout.grades.forEach(grade => {
       if (!stats[workout.type].gradeCounts[grade.grade]) {
         stats[workout.type].gradeCounts[grade.grade] = 0;
@@ -662,7 +584,9 @@ function calculateMonthlyStats() {
       stats[workout.type].totalRoutes += grade.count;
 
       const gradesList = workout.type === 'Bouldering' ? boulderingGrades : sportsClimbingGrades;
+      const gradeValues = workout.type === 'Bouldering' ? boulderingGradeValues : sportsClimbingGradeValues;
       const gradeIndex = gradesList.indexOf(grade.grade);
+      const gradeValue = gradeValues[grade.grade];
 
       // Update hardest route
       const currentHardestIndex = gradesList.indexOf(stats[workout.type].hardestRoute);
@@ -685,10 +609,105 @@ function calculateMonthlyStats() {
           stats.hardestOnsite[workout.type] = grade.grade;
         }
       }
+
+      // For average grade calculation
+      stats[workout.type].totalGradeValue += gradeValue * grade.count;
+      stats[workout.type].totalGradeCount += grade.count;
     });
+
+    // Calculate average grade
+    if (stats[workout.type].totalGradeCount > 0) {
+      stats[workout.type].averageGradeValue =
+        stats[workout.type].totalGradeValue / stats[workout.type].totalGradeCount;
+      const avgIndex = Math.round(stats[workout.type].averageGradeValue) - 1;
+      const gradeList = workout.type === 'Bouldering' ? boulderingGrades : sportsClimbingGrades;
+      stats[workout.type].averageGrade = gradeList[avgIndex] || 'N/A';
+    }
   });
 
   return stats;
+}
+
+// Helper function to check if date is within the month
+function isSameDateMonth(date, startOfMonth, endOfMonth) {
+  return date >= startOfMonth && date <= endOfMonth;
+}
+
+// Function to render the grade distribution chart
+function renderGradeDistributionChart(type) {
+  const chartId = type === 'Bouldering' ? 'bouldering-grade-chart' : 'sports-climbing-grade-chart';
+  const gradeCounts = calculateMonthlyStats(currentMonth.getFullYear(), currentMonth.getMonth())[type].gradeCounts;
+
+  // Get the canvas element
+  const canvas = document.getElementById(chartId);
+  const ctx = canvas.getContext('2d');
+
+  // Prepare data
+  const labels = Object.keys(gradeCounts);
+  const data = Object.values(gradeCounts);
+
+  // Destroy existing chart instance if any
+  if (canvas.chart) {
+    canvas.chart.destroy();
+  }
+
+  // Create chart
+  canvas.chart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Number of Climbs',
+        data: data,
+        backgroundColor: 'rgba(107, 70, 193, 0.6)',
+        borderColor: 'rgba(107, 70, 193, 1)',
+        borderWidth: 1
+      }]
+    },
+    options: {
+      scales: {
+        x: { title: { display: true, text: 'Grades' } },
+        y: { beginAtZero: true, title: { display: true, text: 'Climbs' } }
+      },
+      plugins: {
+        legend: { display: false }
+      }
+    }
+  });
+}
+
+// Function to display comparison with previous month
+function displayComparison(type, statsEl) {
+  const prevMonthDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1);
+  const prevMonthStats = calculateMonthlyStats(prevMonthDate.getFullYear(), prevMonthDate.getMonth());
+
+  const prevStats = prevMonthStats[type];
+
+  const comparisonHeader = document.createElement('h3');
+  comparisonHeader.textContent = 'Comparison to Previous Month';
+  statsEl.appendChild(comparisonHeader);
+
+  if (prevStats && prevStats.totalRoutes > 0) {
+    const totalRoutesComp = document.createElement('p');
+    totalRoutesComp.innerHTML = `Total routes climbed last month: <strong>${prevStats.totalRoutes}</strong>`;
+    statsEl.appendChild(totalRoutesComp);
+
+    const hardestFlashComp = document.createElement('p');
+    hardestFlashComp.innerHTML = `Hardest Flash last month: <strong>${prevMonthStats.hardestFlash[type] || 'N/A'}</strong>`;
+    statsEl.appendChild(hardestFlashComp);
+
+    const hardestOnsiteComp = document.createElement('p');
+    hardestOnsiteComp.innerHTML = `Hardest Onsite last month: <strong>${prevMonthStats.hardestOnsite[type] || 'N/A'}</strong>`;
+    statsEl.appendChild(hardestOnsiteComp);
+
+    const hardestRouteComp = document.createElement('p');
+    hardestRouteComp.innerHTML = `Hardest Route last month: <strong>${prevStats.hardestRoute || 'N/A'}</strong>`;
+    statsEl.appendChild(hardestRouteComp);
+  } else {
+    const noData = document.createElement('p');
+    noData.textContent = 'No data for previous month.';
+    statsEl.appendChild(noData);
+  }
 }
 
 // Local Storage Functions

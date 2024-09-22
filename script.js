@@ -246,8 +246,7 @@ function setupEventListeners() {
   });
 
   document.getElementById('exportDataItem').addEventListener('click', () => {
-    // Perform Export Data action
-    alert('Export Data clicked');
+    exportDataToCSV();
   });
 
   // Info Dialogs
@@ -295,7 +294,9 @@ function setupEventListeners() {
 
 // Open Grade Selection Modal
 function openGradeSelectionModal() {
-  if (!editingWorkoutId) {
+  if (editingWorkoutId) {
+    currentWorkout = workouts.find(w => w.id === editingWorkoutId);
+  } else {
     currentWorkout = {
       id: Date.now().toString(),
       date: selectedDate,
@@ -333,7 +334,7 @@ function openGradeSelectionModal() {
 
     const attemptsDisplay = document.createElement('span');
     attemptsDisplay.classList.add('attempts-display');
-    attemptsDisplay.textContent = '1';
+    attemptsDisplay.textContent = '0';
 
     const attemptsPlusButton = document.createElement('button');
     attemptsPlusButton.classList.add('attempts-button');
@@ -397,14 +398,14 @@ function openGradeSelectionModal() {
       grade: gradeName,
       type: null, // 'flash' or 'onsight'
       count: 0,
-      attempts: 1
+      attempts: 0 // Default attempts to 0
     };
 
     currentWorkout.grades.push(gradeData);
 
     // Event Listeners for Attempts Counter
     attemptsMinusButton.addEventListener('click', () => {
-      gradeData.attempts = Math.max(1, gradeData.attempts - 1);
+      gradeData.attempts = Math.max(0, gradeData.attempts - 1);
       attemptsDisplay.textContent = gradeData.attempts;
       // Disable Flash/Onsight if attempts > 1
       checkAttemptAndDisableFlashOnsight();
@@ -439,6 +440,7 @@ function openGradeSelectionModal() {
     // Event Listeners for Flash/Onsight Buttons
     if (flashButton) {
       flashButton.addEventListener('click', () => {
+        if (selectedWorkoutType !== 'Bouldering') return; // Prevent assigning flash to non-bouldering
         if (gradeData.type === 'flash') {
           gradeData.type = null;
           flashButton.classList.remove('selected');
@@ -450,12 +452,18 @@ function openGradeSelectionModal() {
             gradeData.count = 1;
             countDisplay.textContent = gradeData.count;
           }
+          // Set attempts to 1 if zero
+          if (gradeData.attempts === 0) {
+            gradeData.attempts = 1;
+            attemptsDisplay.textContent = gradeData.attempts;
+          }
         }
       });
     }
 
     if (onsiteButton) {
       onsiteButton.addEventListener('click', () => {
+        if (selectedWorkoutType !== 'Sports Climbing') return; // Prevent assigning onsight to non-sports climbing
         if (gradeData.type === 'onsight') {
           gradeData.type = null;
           onsiteButton.classList.remove('selected');
@@ -467,37 +475,49 @@ function openGradeSelectionModal() {
             gradeData.count = 1;
             countDisplay.textContent = gradeData.count;
           }
+          // Set attempts to 1 if zero
+          if (gradeData.attempts === 0) {
+            gradeData.attempts = 1;
+            attemptsDisplay.textContent = gradeData.attempts;
+          }
         }
       });
     }
 
     // Event Listeners for Count Controls
     minusButton.addEventListener('click', () => {
-      gradeData.count = Math.max(gradeData.type ? 1 : 0, gradeData.count - 1);
+      gradeData.count = Math.max(0, gradeData.count - 1);
       countDisplay.textContent = gradeData.count;
     });
 
     plusButton.addEventListener('click', () => {
       gradeData.count += 1;
       countDisplay.textContent = gradeData.count;
+      // If attempts are zero, set attempts to 1
+      if (gradeData.attempts === 0) {
+        gradeData.attempts = 1;
+        attemptsDisplay.textContent = gradeData.attempts;
+      }
     });
 
     // If editing, load existing data
+    let existingGrade;
     if (editingWorkoutId) {
-      const existingGrade = currentWorkout.grades.find(g => g.grade === gradeName);
-      if (existingGrade) {
-        gradeData.count = existingGrade.count;
-        gradeData.type = existingGrade.type;
-        gradeData.attempts = existingGrade.attempts || 1;
-        countDisplay.textContent = gradeData.count;
-        attemptsDisplay.textContent = gradeData.attempts;
-        if (gradeData.type === 'flash' && flashButton) {
-          flashButton.classList.add('selected');
-        } else if (gradeData.type === 'onsight' && onsiteButton) {
-          onsiteButton.classList.add('selected');
-        }
-        checkAttemptAndDisableFlashOnsight();
+      existingGrade = currentWorkout.grades.find(g => g.grade === gradeName);
+    }
+
+    if (existingGrade) {
+      gradeData.count = existingGrade.count;
+      gradeData.type = existingGrade.type;
+      gradeData.attempts = existingGrade.attempts || 0;
+      countDisplay.textContent = gradeData.count;
+      attemptsDisplay.textContent = gradeData.attempts;
+      if (gradeData.type === 'flash' && flashButton) {
+        flashButton.classList.add('selected');
+      } else if (gradeData.type === 'onsight' && onsiteButton) {
+        onsiteButton.classList.add('selected');
       }
+      checkAttemptAndDisableFlashOnsight();
     }
   });
 
@@ -506,11 +526,11 @@ function openGradeSelectionModal() {
 
 // Save Workout
 function saveWorkout() {
-  // Filter out grades with zero count
-  currentWorkout.grades = currentWorkout.grades.filter(g => g.count > 0);
+  // Filter out grades with zero attempts
+  currentWorkout.grades = currentWorkout.grades.filter(g => g.attempts > 0);
 
   if (currentWorkout.grades.length === 0) {
-    alert('Please add at least one climb to save the workout.');
+    alert('Please add at least one attempt to save the workout.');
     return;
   }
 
@@ -606,10 +626,8 @@ function showWorkoutSummary() {
 
 // Edit Workout
 function editWorkout(workout) {
-  currentWorkout = JSON.parse(JSON.stringify(workout));
   editingWorkoutId = workout.id;
   selectedWorkoutType = workout.type;
-
   closeModal('workout-summary-modal');
   openGradeSelectionModal();
 }
@@ -733,13 +751,13 @@ function calculateMonthlyStats(year, month) {
       const gradeCountObj = stats[workout.type].gradeCounts[grade.grade];
 
       gradeCountObj.sends += grade.count;
-      gradeCountObj.attempts += grade.attempts * grade.count;
+      gradeCountObj.attempts += grade.attempts;
       if (grade.type === 'flash' || grade.type === 'onsight') {
         gradeCountObj.flashesOnsights += grade.count;
       }
 
       stats[workout.type].totalRoutes += grade.count;
-      stats[workout.type].totalAttempts += grade.attempts * grade.count;
+      stats[workout.type].totalAttempts += grade.attempts;
 
       const gradesList = workout.type === 'Bouldering' ? boulderingGrades : sportsClimbingGrades;
       const gradeValues = workout.type === 'Bouldering' ? boulderingGradeValues : sportsClimbingGradeValues;
@@ -812,6 +830,7 @@ function renderGradeDistributionChart(type) {
     const sends = counts.sends;
     const flashesOnsights = counts.flashesOnsights;
     const failedAttempts = Math.max(0, attempts - sends);
+
     const sendsWithoutFlashes = Math.max(0, sends - flashesOnsights);
 
     failedAttemptsData.push(failedAttempts);
@@ -851,7 +870,12 @@ function renderGradeDistributionChart(type) {
       scales: {
         x: {
           stacked: true,
-          title: { display: true, text: 'Grades' }
+          title: { display: true, text: 'Grades' },
+          ticks: {
+            maxRotation: 90,
+            minRotation: 90,
+            autoSkip: false,
+          }
         },
         y: {
           stacked: true,
@@ -865,7 +889,8 @@ function renderGradeDistributionChart(type) {
       },
       plugins: {
         legend: { display: true }
-      }
+      },
+      barThickness: 15 // Adjusted bar thickness to make bars narrower
     }
   });
 }
@@ -1035,4 +1060,39 @@ function populateSportsGradeTable() {
     row.appendChild(yosemiteCell);
     tableBody.appendChild(row);
   });
+}
+
+// Export Data Function
+function exportDataToCSV() {
+  let csvContent = "data:text/csv;charset=utf-8,";
+  csvContent += "Workout ID,Date,Workout Type,Grade,Attempts,Sends,Type\n"; // Header
+
+  workouts.forEach(workout => {
+    workout.grades.forEach(grade => {
+      let type = '';
+      if ((workout.type === 'Bouldering' && grade.type === 'flash') ||
+          (workout.type === 'Sports Climbing' && grade.type === 'onsight')) {
+        type = grade.type;
+      }
+      const row = [
+        workout.id,
+        workout.date.toISOString(),
+        workout.type,
+        grade.grade,
+        grade.attempts,
+        grade.count,
+        type
+      ];
+      csvContent += row.join(",") + "\n";
+    });
+  });
+
+  const encodedUri = encodeURI(csvContent);
+  const link = document.createElement("a");
+  link.setAttribute("href", encodedUri);
+  link.setAttribute("download", "climbing_workouts.csv");
+  document.body.appendChild(link); // Required for FF
+
+  link.click();
+  document.body.removeChild(link);
 }

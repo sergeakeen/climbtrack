@@ -1,202 +1,140 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#6b46c1">
-
   <meta charset="UTF-8">
-  <title>Climbing Workout Tracker</title>
+  <title>Climb Tracker</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Version Marker -->
+  <!-- Version marker for version control -->
   <meta name="version" content="1.0.1">
-  <!-- Include the CSS -->
+  <!-- Include Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <!-- Your stylesheet -->
   <link rel="stylesheet" href="styles.css">
-  <!-- Include Chart.js Library -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
   <div class="container">
-    <!-- Header with Burger Menu -->
+    <!-- App Header -->
     <header class="app-header">
       <button id="burgerMenu" class="burger-menu">
-        <!-- Burger Icon -->
-        <svg xmlns="http://www.w3.org/2000/svg" class="burger-icon" viewBox="0 0 24 24">
-          <path d="M3 12h18M3 6h18M3 18h18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"></path>
-        </svg>
+        <i class="fas fa-bars"></i>
       </button>
-      <h1>Climbing Workout Tracker</h1>
+      <h1>Climb Tracker</h1>
     </header>
 
-    <!-- Side Menu -->
-    <div id="sideMenu" class="side-menu">
-      <div class="menu-item" id="settingsItem">
-        <!-- Settings Icon -->
-        <svg xmlns="http://www.w3.org/2000/svg" class="menu-icon" viewBox="0 0 24 24">
-          <path d="M12 1.75a2 2 0 0 0-2 2v.55a7.983 7.983 0 0 0-3.79 1.564l-.39-.225a2 2 0 0 0-2 0l-.39.225a8.008 8.008 0 0 0-1.566 3.791h-.552a2 2 0 0 0-2 2v.5a2 2 0 0 0 2 2h.552a8.008 8.008 0 0 0 1.566 3.791l.39.225a2 2 0 0 0 2 0l.39-.225a7.983 7.983 0 0 0 3.79 1.564v.55a2 2 0 0 0 2 2h.5a2 2 0 0 0 2-2v-.55a7.983 7.983 0 0 0 3.79-1.564l.39.225a2 2 0 0 0 2 0l.39-.225a8.008 8.008 0 0 0 1.566-3.791h.552a2 2 0 0 0 2-2v-.5a2 2 0 0 0-2-2h-.552a8.008 8.008 0 0 0-1.566-3.791l-.39-.225a2 2 0 0 0-2 0l-.39.225A7.983 7.983 0 0 0 14.5 4.3v-.55a2 2 0 0 0-2-2h-.5zM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10z"></path>
-        </svg>
-        <span>Settings</span>
-      </div>
-      <div class="menu-item" id="exportDataItem">
-        <!-- Export Icon -->
-        <svg xmlns="http://www.w3.org/2000/svg" class="menu-icon" viewBox="0 0 24 24">
-          <path d="M14 11V5h-4v6H5l7 7 7-7h-5z"></path>
-        </svg>
-        <span>Export Data</span>
-      </div>
-      <div class="menu-item" id="gradeConversionItem">
-        <!-- Info Icon -->
-        <svg xmlns="http://www.w3.org/2000/svg" class="menu-icon" viewBox="0 0 24 24">
-          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"></circle>
-          <line x1="12" y1="8" x2="12.01" y2="8" stroke="currentColor" stroke-width="2"></line>
-          <polyline points="12 12 12 16" stroke="currentColor" stroke-width="2"></polyline>
-        </svg>
-        <span>Grade Conversion</span>
-      </div>
-    </div>
-
-    <!-- Calendar Section -->
+    <!-- Calendar -->
     <div class="calendar-container">
       <div class="calendar-header">
-        <button id="prev-month" class="month-nav">&lt;</button>
+        <button id="prev-month" class="month-nav">&#8249;</button>
         <h2 id="month-year"></h2>
-        <button id="next-month" class="month-nav">&gt;</button>
+        <button id="next-month" class="month-nav">&#8250;</button>
       </div>
-      <div id="calendar"></div>
+      <div id="calendar" class="calendar-grid"></div>
     </div>
 
-    <!-- Monthly Statistics -->
+    <!-- Stats Tabs -->
     <div class="stats-container">
-      <h2>Monthly Statistics</h2>
       <div class="tabs">
         <button class="tab-button active" data-tab="bouldering">Bouldering</button>
         <button class="tab-button" data-tab="sports-climbing">Sports Climbing</button>
       </div>
-      <div class="tab-content active" id="bouldering-stats">
+      <div id="bouldering-stats" class="tab-content active">
         <div id="bouldering-stats-content"></div>
-        <!-- Canvas for Bouldering Grade Chart -->
         <canvas id="bouldering-grade-chart"></canvas>
       </div>
-      <div class="tab-content" id="sports-climbing-stats">
+      <div id="sports-climbing-stats" class="tab-content">
         <div id="sports-climbing-stats-content"></div>
-        <!-- Canvas for Sports Climbing Grade Chart -->
         <canvas id="sports-climbing-grade-chart"></canvas>
       </div>
     </div>
+  </div>
 
-    <!-- Modals -->
-    <!-- Workout Type Modal -->
-    <div id="workout-type-modal" class="modal">
-      <div class="modal-content">
-        <span class="close-button" data-close="workout-type-modal">&times;</span>
-        <h2>Select Workout Type</h2>
-        <div class="modal-buttons">
-          <button id="select-bouldering" class="modal-button">Bouldering</button>
-          <button id="select-sports-climbing" class="modal-button">Sports Climbing</button>
+  <!-- Side Menu -->
+  <div id="sideMenu" class="side-menu">
+    <div id="settingsItem" class="menu-item">
+      <i class="fas fa-cog menu-icon"></i>
+      <span>Settings</span>
+    </div>
+    <div id="exportDataItem" class="menu-item">
+      <i class="fas fa-file-export menu-icon"></i>
+      <span>Export Data</span>
+    </div>
+    <div id="gradeConversionItem" class="menu-item">
+      <i class="fas fa-chart-bar menu-icon"></i>
+      <span>Grade Conversion</span>
+    </div>
+  </div>
+
+  <!-- Modals -->
+  <!-- Workout Type Modal -->
+  <div id="workout-type-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-button" data-close="workout-type-modal">&times;</span>
+      <h2>Select Workout Type</h2>
+      <div class="modal-buttons">
+        <button id="select-bouldering" class="modal-button">Bouldering</button>
+        <button id="select-sports-climbing" class="modal-button">Sports Climbing</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Grade Selection Modal -->
+  <div id="grade-selection-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-button" data-close="grade-selection-modal">&times;</span>
+      <h2 id="grade-modal-title">Workout</h2>
+      <div id="grade-list" class="grade-list"></div>
+      <button id="save-workout-button" class="save-button">Save Workout</button>
+    </div>
+  </div>
+
+  <!-- Workout Summary Modal -->
+  <div id="workout-summary-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-button" data-close="workout-summary-modal">&times;</span>
+      <h2>Workout Summary</h2>
+      <div id="workout-summary-content"></div>
+      <button id="add-another-workout-button" class="modal-button">Add Another Workout</button>
+    </div>
+  </div>
+
+  <!-- Grade Conversion Modal -->
+  <div id="gradeConversionModal" class="modal">
+    <div class="modal-content">
+      <span class="close-button" data-close="gradeConversionModal">&times;</span>
+      <h2>Grade Conversion Tables</h2>
+      <div class="conversion-tables">
+        <div class="table-container">
+          <h3>Bouldering Grades</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>American</th>
+                <th>French</th>
+              </tr>
+            </thead>
+            <tbody id="gradeTable"></tbody>
+          </table>
         </div>
-      </div>
-    </div>
-
-    <!-- Grade Selection Modal -->
-    <div id="grade-selection-modal" class="modal">
-      <div class="modal-content">
-        <span class="close-button" data-close="grade-selection-modal">&times;</span>
-        <h2 id="grade-modal-title"></h2>
-        <div id="grade-list" class="grade-list"></div>
-        <button id="save-workout-button" class="save-button">Save Workout</button>
-      </div>
-    </div>
-
-    <!-- Workout Summary Modal -->
-    <div id="workout-summary-modal" class="modal">
-      <div class="modal-content">
-        <span class="close-button" data-close="workout-summary-modal">&times;</span>
-        <h2>Workout Summary</h2>
-        <div id="workout-summary-content"></div>
-        <button id="add-another-workout-button" class="modal-button">Add Another Workout</button>
-      </div>
-    </div>
-
-    <!-- Grade Conversion Modal -->
-    <div id="gradeConversionModal" class="modal">
-      <div class="modal-content">
-        <span class="close-button" data-close="gradeConversionModal">&times;</span>
-        <h2>Grade Conversion Tables</h2>
-        <div class="conversion-tables">
-          <div class="table-container">
-            <h3>Bouldering Grade Conversion</h3>
-            <table>
-              <thead>
-                <tr>
-                  <th>American</th>
-                  <th>French</th>
-                </tr>
-              </thead>
-              <tbody id="gradeTable"></tbody>
-            </table>
-          </div>
-          <div class="table-container">
-            <h3>Sports Climbing Grade Conversion</h3>
-            <table>
-              <thead>
-                <tr>
-                  <th>French</th>
-                  <th>Yosemite</th>
-                </tr>
-              </thead>
-              <tbody id="sportsGradeTable"></tbody>
-            </table>
-          </div>
+        <div class="table-container">
+          <h3>Sports Climbing Grades</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>French</th>
+                <th>Yosemite</th>
+              </tr>
+            </thead>
+            <tbody id="sportsGradeTable"></tbody>
+          </table>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Include the JavaScript -->
+  <!-- Include Scripts -->
+  <!-- Include Chart.js library -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Your main script -->
   <script src="script.js"></script>
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('service-worker.js').then(
-          registration => {
-            console.log('Service Worker registered with scope:', registration.scope);
-          },
-          err => {
-            console.log('Service Worker registration failed:', err);
-          }
-        );
-      });
-    }
-  </script>
-  <script>
-    let deferredPrompt;
-
-    window.addEventListener('beforeinstallprompt', (e) => {
-      // Prevent Chrome from automatically showing the prompt
-      e.preventDefault();
-      // Stash the event so it can be triggered later
-      deferredPrompt = e;
-
-      // Show the Add to Home Screen button
-      const a2hsButton = document.getElementById('a2hsButton');
-      a2hsButton.style.display = 'block';
-
-      // Handle the button click event
-      a2hsButton.addEventListener('click', () => {
-        // Hide the button after it's clicked
-        a2hsButton.style.display = 'none';
-        // Show the install prompt
-        deferredPrompt.prompt();
-        // Wait for the user to respond to the prompt
-        deferredPrompt.userChoice.then((choiceResult) => {
-          if (choiceResult.outcome === 'accepted') {
-            console.log('User accepted the A2HS prompt');
-          } else {
-            console.log('User dismissed the A2HS prompt');
-          }
-          deferredPrompt = null; // Reset the prompt
-        });
-      });
-    });
-  </script>
 </body>
 </html>

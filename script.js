@@ -399,6 +399,16 @@ function openGradeSelectionModal() {
     // Event Listeners for Attempts Controls
     attemptsMinusButton.addEventListener('click', () => {
       gradeData.attempts = Math.max(0, gradeData.attempts - 1);
+      // Ensure attempts >= sends
+      if (gradeData.attempts < gradeData.sends) {
+        gradeData.sends = gradeData.attempts;
+        sendsDisplay.textContent = gradeData.sends;
+        // Ensure sends >= flashesOnsights
+        if (gradeData.sends < gradeData.flashesOnsights) {
+          gradeData.flashesOnsights = gradeData.sends;
+          flashesDisplay.textContent = gradeData.flashesOnsights;
+        }
+      }
       attemptsDisplay.textContent = gradeData.attempts;
       validateInputs();
     });
@@ -412,13 +422,28 @@ function openGradeSelectionModal() {
     // Event Listeners for Sends Controls
     sendsMinusButton.addEventListener('click', () => {
       gradeData.sends = Math.max(0, gradeData.sends - 1);
+      // Ensure sends >= flashesOnsights
+      if (gradeData.sends < gradeData.flashesOnsights) {
+        gradeData.flashesOnsights = gradeData.sends;
+        flashesDisplay.textContent = gradeData.flashesOnsights;
+      }
       sendsDisplay.textContent = gradeData.sends;
+      // Ensure attempts >= sends
+      if (gradeData.attempts < gradeData.sends) {
+        gradeData.attempts = gradeData.sends;
+        attemptsDisplay.textContent = gradeData.attempts;
+      }
       validateInputs();
     });
 
     sendsPlusButton.addEventListener('click', () => {
       gradeData.sends += 1;
       sendsDisplay.textContent = gradeData.sends;
+      // Ensure attempts >= sends
+      if (gradeData.attempts < gradeData.sends) {
+        gradeData.attempts = gradeData.sends;
+        attemptsDisplay.textContent = gradeData.attempts;
+      }
       validateInputs();
     });
 
@@ -426,12 +451,32 @@ function openGradeSelectionModal() {
     flashesMinusButton.addEventListener('click', () => {
       gradeData.flashesOnsights = Math.max(0, gradeData.flashesOnsights - 1);
       flashesDisplay.textContent = gradeData.flashesOnsights;
+      // Ensure sends >= flashesOnsights
+      if (gradeData.sends < gradeData.flashesOnsights) {
+        gradeData.sends = gradeData.flashesOnsights;
+        sendsDisplay.textContent = gradeData.sends;
+      }
+      // Ensure attempts >= sends
+      if (gradeData.attempts < gradeData.sends) {
+        gradeData.attempts = gradeData.sends;
+        attemptsDisplay.textContent = gradeData.attempts;
+      }
       validateInputs();
     });
 
     flashesPlusButton.addEventListener('click', () => {
       gradeData.flashesOnsights += 1;
       flashesDisplay.textContent = gradeData.flashesOnsights;
+      // Ensure sends >= flashesOnsights
+      if (gradeData.sends < gradeData.flashesOnsights) {
+        gradeData.sends = gradeData.flashesOnsights;
+        sendsDisplay.textContent = gradeData.sends;
+      }
+      // Ensure attempts >= sends
+      if (gradeData.attempts < gradeData.sends) {
+        gradeData.attempts = gradeData.sends;
+        attemptsDisplay.textContent = gradeData.attempts;
+      }
       validateInputs();
     });
 
@@ -549,7 +594,7 @@ function showWorkoutSummary() {
       const gradeText = document.createElement('p');
       let text = `${grade.grade}: Attempts ${grade.attempts}, Sends ${grade.sends}`;
       if (grade.flashesOnsights) {
-        text += `, ${selectedWorkoutType === 'Bouldering' ? 'Flashes' : 'Onsights'} ${grade.flashesOnsights}`;
+        text += `, ${workout.type === 'Bouldering' ? 'Flashes' : 'Onsights'} ${grade.flashesOnsights}`;
       }
       gradeText.textContent = text;
       gradesList.appendChild(gradeText);
@@ -568,7 +613,7 @@ function showWorkoutSummary() {
     stats.innerHTML = `
       <p>Total attempts: <strong>${totalAttempts}</strong></p>
       <p>Total sends: <strong>${totalSends}</strong></p>
-      <p>${selectedWorkoutType === 'Bouldering' ? 'Flashes' : 'Onsights'}: <strong>${totalFlashesOnsights}</strong></p>
+      <p>${workout.type === 'Bouldering' ? 'Flashes' : 'Onsights'}: <strong>${totalFlashesOnsights}</strong></p>
     `;
 
     workoutItem.appendChild(stats);
@@ -618,20 +663,21 @@ function updateStatistics() {
   sportsClimbingStatsEl.innerHTML = '';
 
   const monthlyStats = calculateMonthlyStats(currentMonth.getFullYear(), currentMonth.getMonth());
+  const prevMonthlyStats = calculateMonthlyStats(currentMonth.getFullYear(), currentMonth.getMonth() - 1);
 
   // Function to display stats
   function displayStats(type, statsEl) {
     if (monthlyStats[type] && monthlyStats[type].totalAttempts > 0) {
       const totalAttempts = document.createElement('p');
-      totalAttempts.innerHTML = `Total attempts: <strong>${monthlyStats[type].totalAttempts}</strong>`;
+      totalAttempts.innerHTML = `Total attempts: <strong>${monthlyStats[type].totalAttempts}</strong> ${getComparisonPercentage(monthlyStats[type].totalAttempts, prevMonthlyStats[type]?.totalAttempts)}`;
       statsEl.appendChild(totalAttempts);
 
       const totalSends = document.createElement('p');
-      totalSends.innerHTML = `Total sends: <strong>${monthlyStats[type].totalSends}</strong>`;
+      totalSends.innerHTML = `Total sends: <strong>${monthlyStats[type].totalSends}</strong> ${getComparisonPercentage(monthlyStats[type].totalSends, prevMonthlyStats[type]?.totalSends)}`;
       statsEl.appendChild(totalSends);
 
       const totalFlashesOnsights = document.createElement('p');
-      totalFlashesOnsights.innerHTML = `${type === 'Bouldering' ? 'Flashes' : 'Onsights'}: <strong>${monthlyStats[type].totalFlashesOnsights}</strong>`;
+      totalFlashesOnsights.innerHTML = `${type === 'Bouldering' ? 'Flashes' : 'Onsights'}: <strong>${monthlyStats[type].totalFlashesOnsights}</strong> ${getComparisonPercentage(monthlyStats[type].totalFlashesOnsights, prevMonthlyStats[type]?.totalFlashesOnsights)}`;
       statsEl.appendChild(totalFlashesOnsights);
 
       const hardestFlashOnsight = document.createElement('p');
@@ -648,9 +694,6 @@ function updateStatistics() {
 
       // Bar Chart
       renderGradeDistributionChart(type);
-
-      // Comparison to Previous Month
-      displayComparison(type, statsEl);
     } else {
       const noData = document.createElement('p');
       noData.textContent = 'No data for this month.';
@@ -660,6 +703,17 @@ function updateStatistics() {
 
   displayStats('Bouldering', boulderingStatsEl);
   displayStats('Sports Climbing', sportsClimbingStatsEl);
+}
+
+// Helper function to get comparison percentage
+function getComparisonPercentage(currentValue, previousValue) {
+  if (previousValue === undefined || previousValue === 0) {
+    return '';
+  }
+  const change = currentValue - previousValue;
+  const percentageChange = ((change) / previousValue) * 100;
+  const sign = percentageChange >= 0 ? '+' : '';
+  return `<small style="color: ${percentageChange >= 0 ? 'green' : 'red'};">(${sign}${percentageChange.toFixed(1)}%)</small>`;
 }
 
 // Calculate Monthly Stats
@@ -773,6 +827,7 @@ function renderGradeDistributionChart(type) {
   const attemptsData = [];
   const sendsData = [];
   const flashesOnsightsData = [];
+  const totalAttemptsPerGrade = [];
 
   labels.forEach(grade => {
     const counts = gradeCounts[grade];
@@ -785,6 +840,7 @@ function renderGradeDistributionChart(type) {
     attemptsData.push(failedAttempts);
     sendsData.push(sendsWithoutFlashes);
     flashesOnsightsData.push(flashesOnsights);
+    totalAttemptsPerGrade.push(attempts);
   });
 
   // Destroy existing chart instance if any
@@ -809,7 +865,7 @@ function renderGradeDistributionChart(type) {
           backgroundColor: '#48bb78', // Green
         },
         {
-          label: selectedWorkoutType === 'Bouldering' ? 'Flashes' : 'Onsights',
+          label: type === 'Bouldering' ? 'Flashes' : 'Onsights',
           data: flashesOnsightsData,
           backgroundColor: '#4299e1', // Blue
         }
@@ -819,10 +875,10 @@ function renderGradeDistributionChart(type) {
       scales: {
         x: {
           stacked: true,
-          title: { display: true, text: 'Grades' },
+          title: { display: false }, // Removed "Grades" word
           ticks: {
-            maxRotation: 90,
-            minRotation: 90,
+            maxRotation: 0, // Labels written horizontally
+            minRotation: 0,
             autoSkip: false,
           }
         },
@@ -837,70 +893,22 @@ function renderGradeDistributionChart(type) {
         }
       },
       plugins: {
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              const datasetLabel = context.dataset.label || '';
+              const dataPoint = context.parsed.y;
+              const index = context.dataIndex;
+              const totalAttempts = totalAttemptsPerGrade[index];
+              return `${datasetLabel}: ${dataPoint} from ${totalAttempts} total attempts`;
+            }
+          }
+        },
         legend: { display: true }
       },
       barThickness: 15 // Adjusted bar thickness to make bars narrower
     }
   });
-}
-
-// Function to display comparison with previous month
-function displayComparison(type, statsEl) {
-  const prevMonthDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1);
-  const prevMonthStats = calculateMonthlyStats(prevMonthDate.getFullYear(), prevMonthDate.getMonth());
-
-  const prevStats = prevMonthStats[type];
-  const currentStats = calculateMonthlyStats(currentMonth.getFullYear(), currentMonth.getMonth())[type];
-
-  const comparisonHeader = document.createElement('h3');
-  comparisonHeader.textContent = 'Comparison to Previous Month';
-  statsEl.appendChild(comparisonHeader);
-
-  if (prevStats && prevStats.totalAttempts > 0) {
-    const gradeList = type === 'Bouldering' ? boulderingGrades : sportsClimbingGrades;
-
-    // Total Attempts
-    const currentTotalAttempts = currentStats.totalAttempts;
-    const prevTotalAttempts = prevStats.totalAttempts;
-    const totalAttemptsChange = ((currentTotalAttempts - prevTotalAttempts) / prevTotalAttempts) * 100;
-
-    const totalAttemptsComp = document.createElement('p');
-    totalAttemptsComp.innerHTML = `Total attempts last month: <strong>${prevTotalAttempts}</strong> `;
-    const totalAttemptsChangeEl = document.createElement('small');
-    totalAttemptsChangeEl.style.color = totalAttemptsChange >= 0 ? 'green' : 'red';
-    const arrow = totalAttemptsChange >= 0 ? '↑' : '↓';
-    totalAttemptsChangeEl.innerHTML = `${arrow} ${Math.abs(totalAttemptsChange.toFixed(1))}%`;
-    totalAttemptsComp.appendChild(totalAttemptsChangeEl);
-    statsEl.appendChild(totalAttemptsComp);
-
-    // Hardest Route
-    const currentHardestIndex = gradeList.indexOf(currentStats.hardestRoute);
-    const prevHardestIndex = gradeList.indexOf(prevStats.hardestRoute);
-    const hardestRouteChange = currentHardestIndex - prevHardestIndex;
-
-    const hardestRouteComp = document.createElement('p');
-    hardestRouteComp.innerHTML = `Hardest Route last month: <strong>${prevStats.hardestRoute || 'N/A'}</strong> `;
-    const hardestRouteChangeEl = document.createElement('small');
-
-    if (hardestRouteChange > 0) {
-      hardestRouteChangeEl.style.color = 'green';
-      hardestRouteChangeEl.innerHTML = `↑ ${currentStats.hardestRoute}`;
-    } else if (hardestRouteChange < 0) {
-      hardestRouteChangeEl.style.color = 'red';
-      hardestRouteChangeEl.innerHTML = `↓ ${currentStats.hardestRoute}`;
-    } else {
-      hardestRouteChangeEl.innerHTML = 'No change';
-    }
-
-    hardestRouteComp.appendChild(hardestRouteChangeEl);
-    statsEl.appendChild(hardestRouteComp);
-
-    // You can repeat similar calculations for totalSends, totalFlashesOnsights, etc.
-  } else {
-    const noData = document.createElement('p');
-    noData.textContent = 'No data for previous month.';
-    statsEl.appendChild(noData);
-  }
 }
 
 // Local Storage Functions
@@ -920,6 +928,41 @@ function loadWorkoutsFromStorage() {
       date: new Date(workout.date)
     }));
   }
+}
+
+// Grade Conversion Data and Functions
+function populateGradeTable() {
+  const tableBody = document.getElementById('gradeTable');
+  tableBody.innerHTML = ''; // Clear existing content
+  gradeConversionTable.forEach(grade => {
+    const row = document.createElement('tr');
+    const americanCell = document.createElement('td');
+    const frenchCell = document.createElement('td');
+
+    americanCell.textContent = grade.american;
+    frenchCell.textContent = grade.french;
+
+    row.appendChild(americanCell);
+    row.appendChild(frenchCell);
+    tableBody.appendChild(row);
+  });
+}
+
+function populateSportsGradeTable() {
+  const tableBody = document.getElementById('sportsGradeTable');
+  tableBody.innerHTML = ''; // Clear existing content
+  sportsGradeConversionTable.forEach(grade => {
+    const row = document.createElement('tr');
+    const frenchCell = document.createElement('td');
+    const yosemiteCell = document.createElement('td');
+
+    frenchCell.textContent = grade.french;
+    yosemiteCell.textContent = grade.yosemite;
+
+    row.appendChild(frenchCell);
+    row.appendChild(yosemiteCell);
+    tableBody.appendChild(row);
+  });
 }
 
 // Grade Conversion Data
@@ -944,24 +987,6 @@ const gradeConversionTable = [
   { american: "V17", french: "9A" },
 ];
 
-function populateGradeTable() {
-  const tableBody = document.getElementById('gradeTable');
-  tableBody.innerHTML = ''; // Clear existing content
-  gradeConversionTable.forEach(grade => {
-    const row = document.createElement('tr');
-    const americanCell = document.createElement('td');
-    const frenchCell = document.createElement('td');
-
-    americanCell.textContent = grade.american;
-    frenchCell.textContent = grade.french;
-
-    row.appendChild(americanCell);
-    row.appendChild(frenchCell);
-    tableBody.appendChild(row);
-  });
-}
-
-// Sports Climbing Grade Conversion Data
 const sportsGradeConversionTable = [
   { french: "4a", yosemite: "5.5" },
   { french: "4b", yosemite: "5.6" },
@@ -993,23 +1018,6 @@ const sportsGradeConversionTable = [
   { french: "9b+", yosemite: "5.15c" },
   { french: "9c", yosemite: "5.15d" },
 ];
-
-function populateSportsGradeTable() {
-  const tableBody = document.getElementById('sportsGradeTable');
-  tableBody.innerHTML = ''; // Clear existing content
-  sportsGradeConversionTable.forEach(grade => {
-    const row = document.createElement('tr');
-    const frenchCell = document.createElement('td');
-    const yosemiteCell = document.createElement('td');
-
-    frenchCell.textContent = grade.french;
-    yosemiteCell.textContent = grade.yosemite;
-
-    row.appendChild(frenchCell);
-    row.appendChild(yosemiteCell);
-    tableBody.appendChild(row);
-  });
-}
 
 // Export Data Function
 function exportDataToCSV() {

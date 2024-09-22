@@ -230,8 +230,7 @@ h3 {
 
 .grade-item {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
   padding: 10px 0;
   border-bottom: 1px solid #ddd;
 }
@@ -242,61 +241,26 @@ h3 {
 
 .grade-controls {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  flex-direction: column;
+  margin-top: 5px;
 }
 
-/* Attempts Counter Styles */
-.attempts-controls {
+.control-group {
   display: flex;
   align-items: center;
+  margin-bottom: 5px;
 }
 
-.attempts-button {
-  padding: 5px;
-  background-color: #e2e8f0;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.attempts-display {
-  width: 30px;
-  text-align: center;
-}
-
-/* Split Button Styles */
-.split-button {
-  display: flex;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.split-button-half {
+.control-group label {
   flex: 1;
-  padding: 5px;
-  text-align: center;
-  background-color: #e2e8f0;
-  border: none;
-  cursor: pointer;
 }
 
-.split-button-half.selected {
-  background-color: #6b46c1;
-  color: #fff;
-}
-
-.split-button-half:first-child {
-  border-right: 1px solid #ddd;
-}
-
-.count-controls {
+.controls {
   display: flex;
   align-items: center;
 }
 
-.count-button {
+.control-button {
   padding: 5px;
   background-color: #e2e8f0;
   border: none;
@@ -304,9 +268,15 @@ h3 {
   cursor: pointer;
 }
 
-.count-display {
+.control-display {
   width: 30px;
   text-align: center;
+  margin: 0 5px;
+}
+
+.error-message {
+  color: red;
+  font-size: 12px;
 }
 
 /* Workout Summary Styles */

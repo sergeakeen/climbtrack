@@ -14,7 +14,34 @@
 </head>
 <body>
   <div class="container">
-    <h1>Climbing Workout Tracker</h1>
+    <!-- Header with Burger Menu -->
+    <header class="app-header">
+      <button id="burgerMenu" class="burger-menu">
+        <!-- Burger Icon -->
+        <svg xmlns="http://www.w3.org/2000/svg" class="burger-icon" viewBox="0 0 24 24">
+          <path d="M3 12h18M3 6h18M3 18h18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"></path>
+        </svg>
+      </button>
+      <h1>Climbing Workout Tracker</h1>
+    </header>
+
+    <!-- Side Menu -->
+    <div id="sideMenu" class="side-menu">
+      <div class="menu-item" id="settingsItem">
+        <!-- Settings Icon -->
+        <svg xmlns="http://www.w3.org/2000/svg" class="menu-icon" viewBox="0 0 24 24">
+          <path d="M12 1.75a2 2 0 0 0-2 2v.55a7.983 7.983 0 0 0-3.79 1.564l-.39-.225a2 2 0 0 0-2 0l-.39.225a8.008 8.008 0 0 0-1.566 3.791h-.552a2 2 0 0 0-2 2v.5a2 2 0 0 0 2 2h.552a8.008 8.008 0 0 0 1.566 3.791l.39.225a2 2 0 0 0 2 0l.39-.225a7.983 7.983 0 0 0 3.79 1.564v.55a2 2 0 0 0 2 2h.5a2 2 0 0 0 2-2v-.55a7.983 7.983 0 0 0 3.79-1.564l.39.225a2 2 0 0 0 2 0l.39-.225a8.008 8.008 0 0 0 1.566-3.791h.552a2 2 0 0 0 2-2v-.5a2 2 0 0 0-2-2h-.552a8.008 8.008 0 0 0-1.566-3.791l-.39-.225a2 2 0 0 0-2 0l-.39.225A7.983 7.983 0 0 0 14.5 4.3v-.55a2 2 0 0 0-2-2h-.5zM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10z"></path>
+        </svg>
+        <span>Settings</span>
+      </div>
+      <div class="menu-item" id="exportDataItem">
+        <!-- Export Icon -->
+        <svg xmlns="http://www.w3.org/2000/svg" class="menu-icon" viewBox="0 0 24 24">
+          <path d="M14 11V5h-4v6H5l7 7 7-7h-5z"></path>
+        </svg>
+        <span>Export Data</span>
+      </div>
+    </div>
 
     <!-- Info Button for Bouldering Grade Conversion -->
     <button id="openDialog" class="info-button">
@@ -24,6 +51,16 @@
         <line x1="12" y1="8" x2="12.01" y2="8" stroke="currentColor" stroke-width="2"></line>
       </svg>
       Bouldering Grade Conversion
+    </button>
+
+    <!-- Info Button for Sports Climbing Grade Conversion -->
+    <button id="openSportsDialog" class="info-button">
+      <svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"></circle>
+        <polyline points="16 12 12 16 8 12" fill="none" stroke="currentColor" stroke-width="2"></polyline>
+        <line x1="12" y1="8" x2="12" y2="16" stroke="currentColor" stroke-width="2"></line>
+      </svg>
+      Sports Grade Conversion
     </button>
 
     <button id="a2hsButton" style="display:none;">Add to Home Screen</button>
@@ -108,6 +145,25 @@
         <button id="closeDialog" class="close-button">Close</button>
       </div>
     </div>
+
+    <!-- Sports Climbing Grade Conversion Dialog -->
+    <div id="sportsDialog" class="dialog">
+      <div class="dialog-content">
+        <h2>Sports Climbing Grade Conversion</h2>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>French</th>
+                <th>Yosemite</th>
+              </tr>
+            </thead>
+            <tbody id="sportsGradeTable"></tbody>
+          </table>
+        </div>
+        <button id="closeSportsDialog" class="close-button">Close</button>
+      </div>
+    </div>
   </div>
 
   <!-- Include the JavaScript -->
@@ -155,70 +211,6 @@
           deferredPrompt = null; // Reset the prompt
         });
       });
-    });
-  </script>
-
-  <!-- Dialog Script -->
-  <script>
-    // Grade Conversion Data
-    const gradeConversionTable = [
-      { american: "V0", french: "4" },
-      { american: "V1", french: "5" },
-      { american: "V2", french: "5+" },
-      { american: "V3", french: "6A-6A+" },
-      { american: "V4", french: "6B-6B+" },
-      { american: "V5", french: "6C-6C+" },
-      { american: "V6", french: "7A" },
-      { american: "V7", french: "7A+" },
-      { american: "V8", french: "7B-7B+" },
-      { american: "V9", french: "7C" },
-      { american: "V10", french: "7C+" },
-      { american: "V11", french: "8A" },
-      { american: "V12", french: "8A+" },
-      { american: "V13", french: "8B" },
-      { american: "V14", french: "8B+" },
-      { american: "V15", french: "8C" },
-      { american: "V16", french: "8C+" },
-      { american: "V17", french: "9A" },
-    ];
-
-    function populateGradeTable() {
-      const tableBody = document.getElementById('gradeTable');
-      tableBody.innerHTML = ''; // Clear existing content
-      gradeConversionTable.forEach(grade => {
-        const row = document.createElement('tr');
-        const americanCell = document.createElement('td');
-        const frenchCell = document.createElement('td');
-
-        americanCell.textContent = grade.american;
-        frenchCell.textContent = grade.french;
-
-        row.appendChild(americanCell);
-        row.appendChild(frenchCell);
-        tableBody.appendChild(row);
-      });
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      const openButton = document.getElementById('openDialog');
-      const closeButton = document.getElementById('closeDialog');
-      const dialog = document.getElementById('dialog');
-
-      openButton.addEventListener('click', () => {
-        dialog.style.display = 'flex';
-      });
-
-      closeButton.addEventListener('click', () => {
-        dialog.style.display = 'none';
-      });
-
-      dialog.addEventListener('click', (e) => {
-        if (e.target === dialog) {
-          dialog.style.display = 'none';
-        }
-      });
-
-      populateGradeTable();
     });
   </script>
 </body>

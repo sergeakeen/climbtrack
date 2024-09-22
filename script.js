@@ -35,6 +35,8 @@ document.addEventListener('DOMContentLoaded', () => {
   renderCalendar();
   updateStatistics();
   setupEventListeners();
+  populateGradeTable();
+  populateSportsGradeTable();
 });
 
 // Function to render the calendar
@@ -249,47 +251,9 @@ function setupEventListeners() {
     exportDataToCSV();
   });
 
-  // Info Dialogs
-  const openButton = document.getElementById('openDialog');
-  const closeButton = document.getElementById('closeDialog');
-  const dialog = document.getElementById('dialog');
-
-  openButton.addEventListener('click', () => {
-    dialog.style.display = 'flex';
+  document.getElementById('gradeConversionItem').addEventListener('click', () => {
+    openModal('gradeConversionModal');
   });
-
-  closeButton.addEventListener('click', () => {
-    dialog.style.display = 'none';
-  });
-
-  dialog.addEventListener('click', (e) => {
-    if (e.target === dialog) {
-      dialog.style.display = 'none';
-    }
-  });
-
-  populateGradeTable();
-
-  // Sports Grade Conversion Dialog
-  const openSportsButton = document.getElementById('openSportsDialog');
-  const closeSportsButton = document.getElementById('closeSportsDialog');
-  const sportsDialog = document.getElementById('sportsDialog');
-
-  openSportsButton.addEventListener('click', () => {
-    sportsDialog.style.display = 'flex';
-  });
-
-  closeSportsButton.addEventListener('click', () => {
-    sportsDialog.style.display = 'none';
-  });
-
-  sportsDialog.addEventListener('click', (e) => {
-    if (e.target === sportsDialog) {
-      sportsDialog.style.display = 'none';
-    }
-  });
-
-  populateSportsGradeTable();
 }
 
 // Open Grade Selection Modal
@@ -698,7 +662,7 @@ function updateStatistics() {
   displayStats('Sports Climbing', sportsClimbingStatsEl);
 }
 
-// Modified calculateMonthlyStats function
+// Calculate Monthly Stats
 function calculateMonthlyStats(year, month) {
   const stats = {
     Bouldering: {
@@ -802,7 +766,10 @@ function renderGradeDistributionChart(type) {
   const ctx = canvas.getContext('2d');
 
   // Prepare data
-  const labels = Object.keys(gradeCounts);
+  const labels = Object.keys(gradeCounts).sort((a, b) => {
+    const gradesList = type === 'Bouldering' ? boulderingGrades : sportsClimbingGrades;
+    return gradesList.indexOf(a) - gradesList.indexOf(b);
+  });
   const attemptsData = [];
   const sendsData = [];
   const flashesOnsightsData = [];
@@ -832,7 +799,7 @@ function renderGradeDistributionChart(type) {
       labels: labels,
       datasets: [
         {
-          label: 'Attempts',
+          label: 'Failed Attempts',
           data: attemptsData,
           backgroundColor: '#f56565', // Red
         },
@@ -842,7 +809,7 @@ function renderGradeDistributionChart(type) {
           backgroundColor: '#48bb78', // Green
         },
         {
-          label: 'Flashes/Onsights',
+          label: selectedWorkoutType === 'Bouldering' ? 'Flashes' : 'Onsights',
           data: flashesOnsightsData,
           backgroundColor: '#4299e1', // Blue
         }
@@ -1073,3 +1040,5 @@ function exportDataToCSV() {
   link.click();
   document.body.removeChild(link);
 }
+
+// Additional adjustments or functions can be added here as needed

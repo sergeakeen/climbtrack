@@ -1,14 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Include necessary meta tags and links -->
   <meta charset="UTF-8">
   <title>Climb Tracker</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- Version marker for version control -->
   <meta name="version" content="1.0.1">
+  <!-- Link to manifest.json -->
+  <link rel="manifest" href="manifest.json">
+  <!-- Theme color for the browser -->
+  <meta name="theme-color" content="#6b46c1">
   <!-- Include Font Awesome for icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <!-- Your stylesheet -->
+  <!-- Include Chart.js Library -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Include your stylesheet -->
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -16,33 +23,36 @@
     <!-- App Header -->
     <header class="app-header">
       <button id="burgerMenu" class="burger-menu">
-        <i class="fas fa-bars"></i>
+        <i class="fas fa-bars burger-icon"></i>
       </button>
       <h1>Climb Tracker</h1>
     </header>
 
-    <!-- Calendar -->
+    <!-- Calendar Section -->
     <div class="calendar-container">
       <div class="calendar-header">
-        <button id="prev-month" class="month-nav">&#8249;</button>
+        <button id="prev-month" class="month-nav">&lt;</button>
         <h2 id="month-year"></h2>
-        <button id="next-month" class="month-nav">&#8250;</button>
+        <button id="next-month" class="month-nav">&gt;</button>
       </div>
-      <div id="calendar" class="calendar-grid"></div>
+      <div id="calendar"></div>
     </div>
 
-    <!-- Stats Tabs -->
+    <!-- Monthly Statistics -->
     <div class="stats-container">
+      <h2>Monthly Statistics</h2>
       <div class="tabs">
         <button class="tab-button active" data-tab="bouldering">Bouldering</button>
         <button class="tab-button" data-tab="sports-climbing">Sports Climbing</button>
       </div>
-      <div id="bouldering-stats" class="tab-content active">
+      <div class="tab-content active" id="bouldering-stats">
         <div id="bouldering-stats-content"></div>
+        <!-- Canvas for Bouldering Grade Chart -->
         <canvas id="bouldering-grade-chart"></canvas>
       </div>
-      <div id="sports-climbing-stats" class="tab-content">
+      <div class="tab-content" id="sports-climbing-stats">
         <div id="sports-climbing-stats-content"></div>
+        <!-- Canvas for Sports Climbing Grade Chart -->
         <canvas id="sports-climbing-grade-chart"></canvas>
       </div>
     </div>
@@ -50,15 +60,15 @@
 
   <!-- Side Menu -->
   <div id="sideMenu" class="side-menu">
-    <div id="settingsItem" class="menu-item">
+    <div class="menu-item" id="settingsItem">
       <i class="fas fa-cog menu-icon"></i>
       <span>Settings</span>
     </div>
-    <div id="exportDataItem" class="menu-item">
+    <div class="menu-item" id="exportDataItem">
       <i class="fas fa-file-export menu-icon"></i>
       <span>Export Data</span>
     </div>
-    <div id="gradeConversionItem" class="menu-item">
+    <div class="menu-item" id="gradeConversionItem">
       <i class="fas fa-chart-bar menu-icon"></i>
       <span>Grade Conversion</span>
     </div>
@@ -81,7 +91,7 @@
   <div id="grade-selection-modal" class="modal">
     <div class="modal-content">
       <span class="close-button" data-close="grade-selection-modal">&times;</span>
-      <h2 id="grade-modal-title">Workout</h2>
+      <h2 id="grade-modal-title"></h2>
       <div id="grade-list" class="grade-list"></div>
       <button id="save-workout-button" class="save-button">Save Workout</button>
     </div>
@@ -104,7 +114,7 @@
       <h2>Grade Conversion Tables</h2>
       <div class="conversion-tables">
         <div class="table-container">
-          <h3>Bouldering Grades</h3>
+          <h3>Bouldering Grade Conversion</h3>
           <table>
             <thead>
               <tr>
@@ -116,7 +126,7 @@
           </table>
         </div>
         <div class="table-container">
-          <h3>Sports Climbing Grades</h3>
+          <h3>Sports Climbing Grade Conversion</h3>
           <table>
             <thead>
               <tr>
@@ -131,10 +141,37 @@
     </div>
   </div>
 
-  <!-- Include Scripts -->
-  <!-- Include Chart.js library -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- Your main script -->
+  <!-- Include your main script -->
   <script src="script.js"></script>
+
+  <!-- Service Worker Registration Script -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('service-worker.js').then(
+          registration => {
+            console.log('Service Worker registered with scope:', registration.scope);
+          },
+          err => {
+            console.log('Service Worker registration failed:', err);
+          }
+        );
+      });
+    }
+  </script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('service-worker.js').then(
+          registration => {
+            console.log('Service Worker registered with scope:', registration.scope);
+          },
+          err => {
+            console.log('Service Worker registration failed:', err);
+          }
+        );
+      });
+    }
+  </script>
 </body>
 </html>

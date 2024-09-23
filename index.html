@@ -79,7 +79,7 @@
   <div id="workout-type-modal" class="modal">
     <div class="modal-content">
       <span class="close-button" data-close="workout-type-modal">&times;</span>
-      <h2>Select Workout Type</h2>
+      <h2>Select Session</h2>
       <div class="modal-buttons">
         <button id="select-bouldering" class="modal-button">Bouldering</button>
         <button id="select-sports-climbing" class="modal-button">Sports Climbing</button>
@@ -159,19 +159,6 @@
       });
     }
   </script>
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('service-worker.js').then(
-          registration => {
-            console.log('Service Worker registered with scope:', registration.scope);
-          },
-          err => {
-            console.log('Service Worker registration failed:', err);
-          }
-        );
-      });
-    }
-  </script>
+
 </body>
 </html>

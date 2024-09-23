@@ -36,19 +36,19 @@ h1 {
   color: #6b46c1;
   margin-bottom: 20px;
   flex: 1;
-  font-variant: small-caps; /* Small caps applied */
+  font-variant: small-caps;
 }
 
 h2 {
   color: #6b46c1;
   margin-bottom: 10px;
-  font-variant: small-caps; /* Small caps applied */
+  font-variant: small-caps;
 }
 
 h3 {
   color: #6b46c1;
   margin-top: 20px;
-  font-variant: small-caps; /* Small caps applied */
+  font-variant: small-caps;
 }
 
 /* Calendar Styles */
@@ -67,11 +67,11 @@ h3 {
   border: none;
   font-size: 24px;
   cursor: pointer;
-  font-variant: small-caps; /* Small caps applied */
+  font-variant: small-caps;
 }
 
 #month-year {
-  font-variant: small-caps; /* Small caps applied */
+  font-variant: small-caps;
 }
 
 #calendar {
@@ -85,7 +85,7 @@ h3 {
   font-weight: bold;
   text-align: center;
   padding: 5px 0;
-  font-variant: small-caps; /* Small caps applied */
+  font-variant: small-caps;
 }
 
 /* Day Styles */
@@ -97,7 +97,7 @@ h3 {
   position: relative;
   cursor: pointer;
   min-height: 50px;
-  border-radius: 8px; /* Rounded edges */
+  border-radius: 8px;
 }
 
 .day:hover {
@@ -136,11 +136,11 @@ h3 {
 }
 
 .bouldering-dot {
-  background-color: #ed8936;
+  background-color: #6b46c1; /* Main theme color */
 }
 
 .sports-climbing-dot {
-  background-color: #4299e1;
+  background-color: #e2aee3; /* Complementary shade */
 }
 
 /* Monthly Statistics Styles */
@@ -167,7 +167,7 @@ h3 {
   cursor: pointer;
   position: relative;
   transition: background-color 0.3s;
-  font-variant: small-caps; /* Small caps applied */
+  font-variant: small-caps;
 }
 
 .tab-button:first-child {
@@ -188,7 +188,7 @@ h3 {
 }
 
 .tab-button:hover {
-  background-color: #d1d5db;
+  background-color: #9f7aea;
 }
 
 /* Tab Content */
@@ -226,7 +226,7 @@ h3 {
   background-color: #fff;
   margin: 50px auto;
   padding: 20px;
-  border-radius: 4px;
+  border-radius: 8px;
   width: 90%;
   max-width: 500px;
   position: relative;
@@ -253,7 +253,11 @@ h3 {
   color: #fff;
   border-radius: 4px;
   cursor: pointer;
-  font-variant: small-caps; /* Small caps applied */
+  font-variant: small-caps;
+}
+
+.modal-button:hover {
+  background-color: #553c9a;
 }
 
 .save-button {
@@ -265,7 +269,11 @@ h3 {
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  font-variant: small-caps; /* Small caps applied */
+  font-variant: small-caps;
+}
+
+.save-button:hover {
+  background-color: #553c9a;
 }
 
 /* Grade List Styles */
@@ -300,7 +308,7 @@ h3 {
 
 .control-group label {
   flex: 1;
-  font-variant: small-caps; /* Small caps applied */
+  font-variant: small-caps;
 }
 
 .controls {
@@ -310,10 +318,15 @@ h3 {
 
 .control-button {
   padding: 5px;
-  background-color: #e2e8f0;
+  background-color: #6b46c1;
+  color: #fff;
   border: none;
   border-radius: 4px;
   cursor: pointer;
+}
+
+.control-button:hover {
+  background-color: #553c9a;
 }
 
 .control-display {
@@ -368,11 +381,16 @@ h3 {
 
 .workout-summary-buttons button {
   padding: 5px;
-  background-color: #e2e8f0;
+  background-color: #6b46c1;
+  color: #fff;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  font-variant: small-caps; /* Small caps applied */
+  font-variant: small-caps;
+}
+
+.workout-summary-buttons button:hover {
+  background-color: #553c9a;
 }
 
 /* Side Menu Styles */
@@ -409,7 +427,7 @@ h3 {
 }
 
 .menu-item span {
-  font-variant: small-caps; /* Small caps applied */
+  font-variant: small-caps;
 }
 
 /* Conversion Tables */
@@ -426,7 +444,7 @@ h3 {
 
 .table-container h3 {
   text-align: center;
-  font-variant: small-caps; /* Small caps applied */
+  font-variant: small-caps;
 }
 
 table {
@@ -443,7 +461,7 @@ th, td {
 th {
   background-color: #f2f2f2;
   font-weight: bold;
-  font-variant: small-caps; /* Small caps applied */
+  font-variant: small-caps;
 }
 
 tr:nth-child(even) {

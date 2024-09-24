@@ -93,6 +93,10 @@ document.addEventListener('DOMContentLoaded', () => {
   updateStatistics();
   setupEventListeners();
   populateGradeConversionTables();
+
+  // Set the grading system toggle based on the preference
+  const gradingSystemToggle = document.getElementById('gradingSystemToggle');
+  gradingSystemToggle.checked = gradingSystem === 'French';
 });
 
 // Data Migration Function
@@ -250,7 +254,6 @@ function closeModal(modalId) {
   document.getElementById(modalId).style.display = 'none';
 }
 
-
 // Setup Event Listeners
 function setupEventListeners() {
   // Close modals
@@ -312,39 +315,22 @@ function setupEventListeners() {
   // Close the menu when clicking outside
   document.addEventListener('click', (e) => {
     const sideMenu = document.getElementById('sideMenu');
-    const settingsMenu = document.getElementById('settingsMenu');
     const burgerMenu = document.getElementById('burgerMenu');
     if (
       !sideMenu.contains(e.target) &&
-      !burgerMenu.contains(e.target) &&
-      !settingsMenu.contains(e.target)
+      !burgerMenu.contains(e.target)
     ) {
       sideMenu.classList.remove('open');
-      settingsMenu.classList.remove('open');
     }
   });
 
-  // Menu Item Click Events
-  document.getElementById('settingsItem').addEventListener('click', () => {
-    // Close side menu and open settings menu
-    document.getElementById('sideMenu').classList.remove('open');
-    document.getElementById('settingsMenu').classList.add('open');
-
-    // Set the current grading system in the select
-    document.getElementById('gradingSystemSelect').value = gradingSystem;
-  });
-
-  // Close Settings Button
-  document.getElementById('closeSettingsButton').addEventListener('click', () => {
-    document.getElementById('settingsMenu').classList.remove('open');
-
-    // Save the selected grading system
-    gradingSystem = document.getElementById('gradingSystemSelect').value;
+  // Grading System Toggle
+  document.getElementById('gradingSystemToggle').addEventListener('change', (e) => {
+    gradingSystem = e.target.checked ? 'French' : 'American';
     saveGradingSystemPreference();
-
-    // Update the UI to reflect the new grading system
     renderCalendar();
     updateStatistics();
+    openModal('gradeConversionModal'); // Optional: Show conversion modal on change
   });
 
   // Export Data
@@ -358,6 +344,19 @@ function setupEventListeners() {
     openModal('gradeConversionModal');
     document.getElementById('sideMenu').classList.remove('open');
   });
+}
+
+// Switch Tabs
+function switchTab(tab) {
+  document.querySelectorAll('.tab-button').forEach(button => {
+    button.classList.remove('active');
+  });
+  document.querySelectorAll('.tab-content').forEach(content => {
+    content.classList.remove('active');
+  });
+
+  document.querySelector(`.tab-button[data-tab="${tab}"]`).classList.add('active');
+  document.getElementById(`${tab}-stats`).classList.add('active');
 }
 
 // Open Grade Selection Modal
@@ -749,19 +748,6 @@ function deleteWorkout(workoutId) {
   showWorkoutSummary();
 }
 
-// Switch Tabs
-function switchTab(tab) {
-  document.querySelectorAll('.tab-button').forEach(button => {
-    button.classList.remove('active');
-  });
-  document.querySelectorAll('.tab-content').forEach(content => {
-    content.classList.remove('active');
-  });
-
-  document.querySelector(`.tab-button[data-tab="${tab}"]`).classList.add('active');
-  document.getElementById(`${tab}-stats`).classList.add('active');
-}
-
 // Update Statistics
 function updateStatistics() {
   const boulderingStatsEl = document.getElementById('bouldering-stats-content');
@@ -771,43 +757,43 @@ function updateStatistics() {
   sportsClimbingStatsEl.innerHTML = '';
 
   const monthlyStats = calculateMonthlyStats(currentMonth.getFullYear(), currentMonth.getMonth());
-  const prevMonthlyStats = calculateMonthlyStats(currentMonth.getFullYear(), currentMonth.getMonth() - 1);
 
-  // Function to display stats
+  // Function to display stats as cards
   function displayStats(type, statsEl) {
     if (monthlyStats[type] && monthlyStats[type].totalAttempts > 0) {
-      const totalAttempts = document.createElement('p');
-      totalAttempts.innerHTML = `Total attempts: <strong>${monthlyStats[type].totalAttempts}</strong>`;
-      statsEl.appendChild(totalAttempts);
+      const statsCards = document.createElement('div');
+      statsCards.classList.add('stats-cards');
 
-      const totalSends = document.createElement('p');
-      totalSends.innerHTML = `Total sends: <strong>${monthlyStats[type].totalSends}</strong>`;
-      statsEl.appendChild(totalSends);
-
-      const totalFlashesOnsights = document.createElement('p');
-      totalFlashesOnsights.innerHTML = `${type === 'Bouldering' ? 'Flashes' : 'Onsights'}: <strong>${monthlyStats[type].totalFlashesOnsights}</strong>`;
-      statsEl.appendChild(totalFlashesOnsights);
-
-      const hardestFlashOnsight = document.createElement('p');
-      const hardestFlashGrade = monthlyStats.hardestFlashOnsight[type]
+      const totalAttemptsCard = createStatCard('Total Attempts', monthlyStats[type].totalAttempts);
+      const totalSendsCard = createStatCard('Total Sends', monthlyStats[type].totalSends);
+      const totalFlashesOnsightsCard = createStatCard(
+        type === 'Bouldering' ? 'Flashes' : 'Onsights',
+        monthlyStats[type].totalFlashesOnsights
+      );
+      const hardestFlashOnsightGrade = monthlyStats.hardestFlashOnsight[type]
         ? getGradeName(monthlyStats.hardestFlashOnsight[type].gradeId, type)
         : 'N/A';
-      hardestFlashOnsight.innerHTML = `Hardest ${type === 'Bouldering' ? 'Flash' : 'Onsight'}: <strong>${hardestFlashGrade}</strong>`;
-      statsEl.appendChild(hardestFlashOnsight);
-
-      const hardestRoute = document.createElement('p');
+      const hardestFlashOnsightCard = createStatCard(
+        `Hardest ${type === 'Bouldering' ? 'Flash' : 'Onsight'}`,
+        hardestFlashOnsightGrade
+      );
       const hardestRouteGrade = monthlyStats[type].hardestRouteId
         ? getGradeName(monthlyStats[type].hardestRouteId, type)
         : 'N/A';
-      hardestRoute.innerHTML = `Hardest Route: <strong>${hardestRouteGrade}</strong>`;
-      statsEl.appendChild(hardestRoute);
-
-      const averageGrade = document.createElement('p');
+      const hardestRouteCard = createStatCard('Hardest Route', hardestRouteGrade);
       const averageGradeName = monthlyStats[type].averageGradeId
         ? getGradeName(monthlyStats[type].averageGradeId, type)
         : 'N/A';
-      averageGrade.innerHTML = `Average Grade: <strong>${averageGradeName}</strong>`;
-      statsEl.appendChild(averageGrade);
+      const averageGradeCard = createStatCard('Average Grade', averageGradeName);
+
+      statsCards.appendChild(totalAttemptsCard);
+      statsCards.appendChild(totalSendsCard);
+      statsCards.appendChild(totalFlashesOnsightsCard);
+      statsCards.appendChild(hardestFlashOnsightCard);
+      statsCards.appendChild(hardestRouteCard);
+      statsCards.appendChild(averageGradeCard);
+
+      statsEl.appendChild(statsCards);
 
       // Bar Chart
       renderGradeDistributionChart(type);
@@ -816,6 +802,22 @@ function updateStatistics() {
       noData.textContent = 'No data for this month.';
       statsEl.appendChild(noData);
     }
+  }
+
+  // Helper function to create a stat card
+  function createStatCard(title, value) {
+    const card = document.createElement('div');
+    card.classList.add('stat-card');
+
+    const cardTitle = document.createElement('h3');
+    cardTitle.textContent = title;
+    card.appendChild(cardTitle);
+
+    const cardValue = document.createElement('p');
+    cardValue.textContent = value;
+    card.appendChild(cardValue);
+
+    return card;
   }
 
   displayStats('Bouldering', boulderingStatsEl);
@@ -994,7 +996,8 @@ function renderGradeDistributionChart(type) {
             display: false
           },
           grid: {
-            display: false
+            display: false,
+            drawBorder: false // Remove y-axis line
           }
         }
       },
@@ -1010,7 +1013,7 @@ function renderGradeDistributionChart(type) {
             }
           }
         },
-        legend: { display: true }
+        legend: { display: false } // Remove legend
       },
       barThickness: 15
     }

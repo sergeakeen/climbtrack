@@ -1,4 +1,3 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,8 +5,8 @@
   <meta charset="UTF-8">
   <title>Climb Tracker</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Version marker for version control -->
-  <meta name="version" content="1.0.1">
+  <!-- Version marker for version control FIX MENU BUG-->
+  <meta name="version" content="0.8.9">
   <!-- Link to manifest.json -->
   <link rel="manifest" href="manifest.json">
   <!-- Theme color for the browser -->
@@ -47,12 +46,12 @@
         <button class="tab-button" data-tab="sports-climbing">Sports Climbing</button>
       </div>
       <div class="tab-content active" id="bouldering-stats">
-        <div id="bouldering-stats-content"></div>
+        <div id="bouldering-stats-content" class="stats-cards"></div>
         <!-- Canvas for Bouldering Grade Chart -->
         <canvas id="bouldering-grade-chart"></canvas>
       </div>
       <div class="tab-content" id="sports-climbing-stats">
-        <div id="sports-climbing-stats-content"></div>
+        <div id="sports-climbing-stats-content" class="stats-cards"></div>
         <!-- Canvas for Sports Climbing Grade Chart -->
         <canvas id="sports-climbing-grade-chart"></canvas>
       </div>
@@ -61,10 +60,6 @@
 
   <!-- Side Menu -->
   <div id="sideMenu" class="side-menu">
-    <div class="menu-item" id="settingsItem">
-      <i class="fas fa-cog menu-icon"></i>
-      <span>Settings</span>
-    </div>
     <div class="menu-item" id="exportDataItem">
       <i class="fas fa-file-export menu-icon"></i>
       <span>Export Data</span>
@@ -73,18 +68,14 @@
       <i class="fas fa-chart-bar menu-icon"></i>
       <span>Grade Conversion</span>
     </div>
-  </div>
-
-  <!-- Settings Menu -->
-  <div id="settingsMenu" class="settings-menu">
-    <div class="settings-content">
-      <h2>Settings</h2>
-      <label for="gradingSystemSelect">Select Grading System:</label>
-      <select id="gradingSystemSelect">
-        <option value="American">American</option>
-        <option value="French">French</option>
-      </select>
-      <button id="closeSettingsButton" class="modal-button">Save and Close</button>
+    <!-- Grading System Toggle -->
+    <div class="grading-switch">
+      <span class="grading-label">American</span>
+      <label class="switch">
+        <input type="checkbox" id="gradingSystemToggle">
+        <span class="slider round"></span>
+      </label>
+      <span class="grading-label">French</span>
     </div>
   </div>
 

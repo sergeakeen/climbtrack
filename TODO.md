@@ -1,8 +1,11 @@
 # TODO List
 
-
+- for launch
+  local db
+  better ui
 
 - [ ] Add climbing grade conversion settings
+
 - [ ] Submit to google play
 
 

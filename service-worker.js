@@ -4,8 +4,8 @@ const urlsToCache = [
   'index.html',
   'styles.css',
   'script.js',
-  'icon192.png',
-  'icon512.png',
+  'icons/icon192.png',
+  'icons/icon512.png',
   // Include any other assets you want to cache
 ];
 

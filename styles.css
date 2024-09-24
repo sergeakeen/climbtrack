@@ -1,3 +1,5 @@
+/* styles.css */
+
 /* General Styles */
 body {
   margin: 0;
@@ -428,6 +430,49 @@ h3 {
 
 .menu-item span {
   font-variant: small-caps;
+}
+
+
+/* Settings Menu Styles */
+.settings-menu {
+  position: fixed;
+  top: 0;
+  left: -250px; /* Hidden off-screen */
+  width: 250px;
+  height: 100%;
+  background-color: #fff;
+  box-shadow: 2px 0 5px rgba(0,0,0,0.5);
+  transition: left 0.3s ease;
+  z-index: 2000;
+}
+
+.settings-menu.open {
+  left: 0;
+}
+
+.settings-content {
+  padding: 20px;
+}
+
+.settings-content h2 {
+  margin-top: 0;
+  font-variant: small-caps;
+}
+
+.settings-content label {
+  display: block;
+  margin-bottom: 10px;
+  font-variant: small-caps;
+}
+
+.settings-content select {
+  width: 100%;
+  padding: 5px;
+  margin-bottom: 20px;
+}
+
+.settings-content .modal-button {
+  width: 100%;
 }
 
 /* Conversion Tables */

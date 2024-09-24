@@ -1,27 +1,82 @@
-// Data
-const boulderingGrades = [
-  "V0 (4)", "V1 (5)", "V2 (5+)", "V3 (6A)", "V4 (6B)", "V5 (6C)", "V6 (7A)",
-  "V7 (7A+)", "V8 (7B)", "V9 (7C)", "V10 (7C+)", "V11 (8A)", "V12 (8A+)",
-  "V13 (8B)", "V14 (8B+)", "V15 (8C)", "V16 (8C+)", "V17 (9A)"
+// script.js
+
+// Unified Grades Array with all grades included
+const grades = [
+  // Bouldering Grades
+  { id: 1, type: 'Bouldering', american: 'V0', french: '4', gradeValue: 1 },
+  { id: 2, type: 'Bouldering', american: 'V1', french: '5', gradeValue: 2 },
+  { id: 3, type: 'Bouldering', american: 'V2', french: '5+', gradeValue: 3 },
+  { id: 4, type: 'Bouldering', american: 'V3', french: '6A', gradeValue: 4 },
+  { id: 5, type: 'Bouldering', american: 'V4', french: '6A+', gradeValue: 5 },
+  { id: 6, type: 'Bouldering', american: 'V5', french: '6B', gradeValue: 6 },
+  { id: 7, type: 'Bouldering', american: 'V6', french: '6B+', gradeValue: 7 },
+  { id: 8, type: 'Bouldering', american: 'V7', french: '6C', gradeValue: 8 },
+  { id: 9, type: 'Bouldering', american: 'V8', french: '6C+', gradeValue: 9 },
+  { id: 10, type: 'Bouldering', american: 'V9', french: '7A', gradeValue: 10 },
+  { id: 11, type: 'Bouldering', american: 'V10', french: '7A+', gradeValue: 11 },
+  { id: 12, type: 'Bouldering', american: 'V11', french: '7B', gradeValue: 12 },
+  { id: 13, type: 'Bouldering', american: 'V12', french: '7B+', gradeValue: 13 },
+  { id: 14, type: 'Bouldering', american: 'V13', french: '7C', gradeValue: 14 },
+  { id: 15, type: 'Bouldering', american: 'V14', french: '7C+', gradeValue: 15 },
+  { id: 16, type: 'Bouldering', american: 'V15', french: '8A', gradeValue: 16 },
+  { id: 17, type: 'Bouldering', american: 'V16', french: '8A+', gradeValue: 17 },
+  { id: 18, type: 'Bouldering', american: 'V17', french: '8B', gradeValue: 18 },
+
+  // Sports Climbing Grades
+  { id: 1, type: 'Sports Climbing', american: '5.6', french: '4c', gradeValue: 1 },
+  { id: 2, type: 'Sports Climbing', american: '5.7', french: '5a', gradeValue: 2 },
+  { id: 3, type: 'Sports Climbing', american: '5.8', french: '5b', gradeValue: 3 },
+  { id: 4, type: 'Sports Climbing', american: '5.9', french: '5c', gradeValue: 4 },
+  { id: 5, type: 'Sports Climbing', american: '5.10a', french: '6a', gradeValue: 5 },
+  { id: 6, type: 'Sports Climbing', american: '5.10b', french: '6a+', gradeValue: 6 },
+  { id: 7, type: 'Sports Climbing', american: '5.10c', french: '6b', gradeValue: 7 },
+  { id: 8, type: 'Sports Climbing', american: '5.10d', french: '6b+', gradeValue: 8 },
+  { id: 9, type: 'Sports Climbing', american: '5.11a', french: '6c', gradeValue: 9 },
+  { id: 10, type: 'Sports Climbing', american: '5.11b', french: '6c+', gradeValue: 10 },
+  { id: 11, type: 'Sports Climbing', american: '5.11c', french: '7a', gradeValue: 11 },
+  { id: 12, type: 'Sports Climbing', american: '5.11d', french: '7a+', gradeValue: 12 },
+  { id: 13, type: 'Sports Climbing', american: '5.12a', french: '7b', gradeValue: 13 },
+  { id: 14, type: 'Sports Climbing', american: '5.12b', french: '7b+', gradeValue: 14 },
+  { id: 15, type: 'Sports Climbing', american: '5.12c', french: '7c', gradeValue: 15 },
+  { id: 16, type: 'Sports Climbing', american: '5.12d', french: '7c+', gradeValue: 16 },
+  { id: 17, type: 'Sports Climbing', american: '5.13a', french: '8a', gradeValue: 17 },
+  { id: 18, type: 'Sports Climbing', american: '5.13b', french: '8a+', gradeValue: 18 },
+  { id: 19, type: 'Sports Climbing', american: '5.13c', french: '8b', gradeValue: 19 },
+  { id: 20, type: 'Sports Climbing', american: '5.13d', french: '8b+', gradeValue: 20 },
+  { id: 21, type: 'Sports Climbing', american: '5.14a', french: '8c', gradeValue: 21 },
+  { id: 22, type: 'Sports Climbing', american: '5.14b', french: '8c+', gradeValue: 22 },
+  { id: 23, type: 'Sports Climbing', american: '5.14c', french: '9a', gradeValue: 23 },
+  { id: 24, type: 'Sports Climbing', american: '5.14d', french: '9a+', gradeValue: 24 },
+  { id: 25, type: 'Sports Climbing', american: '5.15a', french: '9b', gradeValue: 25 },
+  { id: 26, type: 'Sports Climbing', american: '5.15b', french: '9b+', gradeValue: 26 },
+  { id: 27, type: 'Sports Climbing', american: '5.15c', french: '9c', gradeValue: 27 },
+  { id: 28, type: 'Sports Climbing', american: '5.15d', french: '9c+', gradeValue: 28 },
 ];
 
-const sportsClimbingGrades = [
-  "4a", "4b", "4c", "5a", "5b", "5c", "6a", "6a+", "6b", "6b+", "6c", "6c+",
-  "7a", "7a+", "7b", "7b+", "7c", "7c+", "8a", "8a+", "8b", "8b+", "8c", "8c+",
-  "9a", "9a+", "9b", "9b+", "9c"
-];
+// Grading system preference
+let gradingSystem = 'American'; // Default to American
 
-// Grade values for average calculation
-const boulderingGradeValues = {};
-boulderingGrades.forEach((grade, index) => {
-  boulderingGradeValues[grade] = index + 1;
-});
+// Load Grading System Preference
+function loadGradingSystemPreference() {
+  const storedPreference = localStorage.getItem('gradingSystem');
+  if (storedPreference) {
+    gradingSystem = storedPreference;
+  }
+}
 
-const sportsClimbingGradeValues = {};
-sportsClimbingGrades.forEach((grade, index) => {
-  sportsClimbingGradeValues[grade] = index + 1;
-});
+// Save Grading System Preference
+function saveGradingSystemPreference() {
+  localStorage.setItem('gradingSystem', gradingSystem);
+}
 
+// Get Grade Name
+function getGradeName(gradeId, type) {
+  const grade = grades.find(g => g.id === gradeId && g.type === type);
+  if (!grade) return 'N/A';
+  return gradingSystem === 'American' ? grade.american : grade.french;
+}
+
+// State Variables
 let selectedDate = new Date();
 let currentMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
 let workouts = [];
@@ -31,13 +86,34 @@ let selectedWorkoutType = null;
 
 // Initialize App
 document.addEventListener('DOMContentLoaded', () => {
+  loadGradingSystemPreference();
   loadWorkoutsFromStorage();
+  migrateWorkoutData();
   renderCalendar();
   updateStatistics();
   setupEventListeners();
-  populateGradeTable();
-  populateSportsGradeTable();
+  populateGradeConversionTables();
 });
+
+// Data Migration Function
+function migrateWorkoutData() {
+  workouts.forEach(workout => {
+    workout.grades.forEach(gradeEntry => {
+      if (gradeEntry.grade) {
+        // Convert old grade names to gradeId
+        const grade = grades.find(
+          g =>
+            (g.american === gradeEntry.grade || g.french === gradeEntry.grade) &&
+            g.type === workout.type
+        );
+        if (grade) {
+          gradeEntry.gradeId = grade.id;
+          delete gradeEntry.grade;
+        }
+      }
+    });
+  });
+}
 
 // Function to render the calendar
 function renderCalendar() {
@@ -174,6 +250,7 @@ function closeModal(modalId) {
   document.getElementById(modalId).style.display = 'none';
 }
 
+
 // Setup Event Listeners
 function setupEventListeners() {
   // Close modals
@@ -235,24 +312,51 @@ function setupEventListeners() {
   // Close the menu when clicking outside
   document.addEventListener('click', (e) => {
     const sideMenu = document.getElementById('sideMenu');
+    const settingsMenu = document.getElementById('settingsMenu');
     const burgerMenu = document.getElementById('burgerMenu');
-    if (!sideMenu.contains(e.target) && !burgerMenu.contains(e.target)) {
+    if (
+      !sideMenu.contains(e.target) &&
+      !burgerMenu.contains(e.target) &&
+      !settingsMenu.contains(e.target)
+    ) {
       sideMenu.classList.remove('open');
+      settingsMenu.classList.remove('open');
     }
   });
 
   // Menu Item Click Events
   document.getElementById('settingsItem').addEventListener('click', () => {
-    // Open Settings Modal or perform settings action
-    alert('Settings clicked');
+    // Close side menu and open settings menu
+    document.getElementById('sideMenu').classList.remove('open');
+    document.getElementById('settingsMenu').classList.add('open');
+
+    // Set the current grading system in the select
+    document.getElementById('gradingSystemSelect').value = gradingSystem;
   });
 
+  // Close Settings Button
+  document.getElementById('closeSettingsButton').addEventListener('click', () => {
+    document.getElementById('settingsMenu').classList.remove('open');
+
+    // Save the selected grading system
+    gradingSystem = document.getElementById('gradingSystemSelect').value;
+    saveGradingSystemPreference();
+
+    // Update the UI to reflect the new grading system
+    renderCalendar();
+    updateStatistics();
+  });
+
+  // Export Data
   document.getElementById('exportDataItem').addEventListener('click', () => {
     exportDataToCSV();
+    document.getElementById('sideMenu').classList.remove('open');
   });
 
+  // Grade Conversion
   document.getElementById('gradeConversionItem').addEventListener('click', () => {
     openModal('gradeConversionModal');
+    document.getElementById('sideMenu').classList.remove('open');
   });
 }
 
@@ -275,14 +379,15 @@ function openGradeSelectionModal() {
   const gradeList = document.getElementById('grade-list');
   gradeList.innerHTML = '';
 
-  const grades = selectedWorkoutType === 'Bouldering' ? boulderingGrades : sportsClimbingGrades;
+  // Get grades for the selected workout type
+  const gradeOptions = grades.filter(g => g.type === selectedWorkoutType);
 
-  grades.forEach(gradeName => {
+  gradeOptions.forEach(gradeObj => {
     const gradeItem = document.createElement('div');
     gradeItem.classList.add('grade-item');
 
     const gradeLabel = document.createElement('span');
-    gradeLabel.textContent = gradeName;
+    gradeLabel.textContent = getGradeName(gradeObj.id, gradeObj.type);
     gradeItem.appendChild(gradeLabel);
 
     const gradeControls = document.createElement('div');
@@ -388,7 +493,7 @@ function openGradeSelectionModal() {
 
     // Initialize grade data
     let gradeData = {
-      grade: gradeName,
+      gradeId: gradeObj.id,
       attempts: 0,
       sends: 0,
       flashesOnsights: 0
@@ -494,7 +599,7 @@ function openGradeSelectionModal() {
     // If editing, load existing data
     let existingGrade;
     if (editingWorkoutId) {
-      existingGrade = currentWorkout.grades.find(g => g.grade === gradeName);
+      existingGrade = currentWorkout.grades.find(g => g.gradeId === gradeObj.id);
     }
 
     if (existingGrade) {
@@ -519,11 +624,13 @@ function saveWorkout() {
   // Validate all grades
   for (let grade of currentWorkout.grades) {
     if (grade.sends > grade.attempts) {
-      alert(`For grade ${grade.grade}, sends cannot exceed attempts.`);
+      const gradeName = getGradeName(grade.gradeId, currentWorkout.type);
+      alert(`For grade ${gradeName}, sends cannot exceed attempts.`);
       return;
     }
     if (grade.flashesOnsights > grade.sends) {
-      alert(`For grade ${grade.grade}, flashes/onsights cannot exceed sends.`);
+      const gradeName = getGradeName(grade.gradeId, currentWorkout.type);
+      alert(`For grade ${gradeName}, flashes/onsights cannot exceed sends.`);
       return;
     }
   }
@@ -592,7 +699,8 @@ function showWorkoutSummary() {
 
     workout.grades.forEach(grade => {
       const gradeText = document.createElement('p');
-      let text = `${grade.grade}: Attempts ${grade.attempts}, Sends ${grade.sends}`;
+      let gradeName = getGradeName(grade.gradeId, workout.type);
+      let text = `${gradeName}: Attempts ${grade.attempts}, Sends ${grade.sends}`;
       if (grade.flashesOnsights) {
         text += `, ${workout.type === 'Bouldering' ? 'Flashes' : 'Onsights'} ${grade.flashesOnsights}`;
       }
@@ -669,27 +777,36 @@ function updateStatistics() {
   function displayStats(type, statsEl) {
     if (monthlyStats[type] && monthlyStats[type].totalAttempts > 0) {
       const totalAttempts = document.createElement('p');
-      totalAttempts.innerHTML = `Total attempts: <strong>${monthlyStats[type].totalAttempts}</strong> ${getComparisonPercentage(monthlyStats[type].totalAttempts, prevMonthlyStats[type]?.totalAttempts)}`;
+      totalAttempts.innerHTML = `Total attempts: <strong>${monthlyStats[type].totalAttempts}</strong>`;
       statsEl.appendChild(totalAttempts);
 
       const totalSends = document.createElement('p');
-      totalSends.innerHTML = `Total sends: <strong>${monthlyStats[type].totalSends}</strong> ${getComparisonPercentage(monthlyStats[type].totalSends, prevMonthlyStats[type]?.totalSends)}`;
+      totalSends.innerHTML = `Total sends: <strong>${monthlyStats[type].totalSends}</strong>`;
       statsEl.appendChild(totalSends);
 
       const totalFlashesOnsights = document.createElement('p');
-      totalFlashesOnsights.innerHTML = `${type === 'Bouldering' ? 'Flashes' : 'Onsights'}: <strong>${monthlyStats[type].totalFlashesOnsights}</strong> ${getComparisonPercentage(monthlyStats[type].totalFlashesOnsights, prevMonthlyStats[type]?.totalFlashesOnsights)}`;
+      totalFlashesOnsights.innerHTML = `${type === 'Bouldering' ? 'Flashes' : 'Onsights'}: <strong>${monthlyStats[type].totalFlashesOnsights}</strong>`;
       statsEl.appendChild(totalFlashesOnsights);
 
       const hardestFlashOnsight = document.createElement('p');
-      hardestFlashOnsight.innerHTML = `Hardest ${type === 'Bouldering' ? 'Flash' : 'Onsight'}: <strong>${monthlyStats.hardestFlashOnsight[type] || 'N/A'}</strong>`;
+      const hardestFlashGrade = monthlyStats.hardestFlashOnsight[type]
+        ? getGradeName(monthlyStats.hardestFlashOnsight[type].gradeId, type)
+        : 'N/A';
+      hardestFlashOnsight.innerHTML = `Hardest ${type === 'Bouldering' ? 'Flash' : 'Onsight'}: <strong>${hardestFlashGrade}</strong>`;
       statsEl.appendChild(hardestFlashOnsight);
 
       const hardestRoute = document.createElement('p');
-      hardestRoute.innerHTML = `Hardest Route: <strong>${monthlyStats[type].hardestRoute || 'N/A'}</strong>`;
+      const hardestRouteGrade = monthlyStats[type].hardestRouteId
+        ? getGradeName(monthlyStats[type].hardestRouteId, type)
+        : 'N/A';
+      hardestRoute.innerHTML = `Hardest Route: <strong>${hardestRouteGrade}</strong>`;
       statsEl.appendChild(hardestRoute);
 
       const averageGrade = document.createElement('p');
-      averageGrade.innerHTML = `Average Grade: <strong>${monthlyStats[type].averageGrade || 'N/A'}</strong>`;
+      const averageGradeName = monthlyStats[type].averageGradeId
+        ? getGradeName(monthlyStats[type].averageGradeId, type)
+        : 'N/A';
+      averageGrade.innerHTML = `Average Grade: <strong>${averageGradeName}</strong>`;
       statsEl.appendChild(averageGrade);
 
       // Bar Chart
@@ -705,17 +822,6 @@ function updateStatistics() {
   displayStats('Sports Climbing', sportsClimbingStatsEl);
 }
 
-// Helper function to get comparison percentage
-function getComparisonPercentage(currentValue, previousValue) {
-  if (previousValue === undefined || previousValue === 0) {
-    return '';
-  }
-  const change = currentValue - previousValue;
-  const percentageChange = ((change) / previousValue) * 100;
-  const sign = percentageChange >= 0 ? '+' : '';
-  return `<small style="color: ${percentageChange >= 0 ? 'green' : 'red'};">(${sign}${percentageChange.toFixed(1)}%)</small>`;
-}
-
 // Calculate Monthly Stats
 function calculateMonthlyStats(year, month) {
   const stats = {
@@ -724,24 +830,26 @@ function calculateMonthlyStats(year, month) {
       totalAttempts: 0,
       totalSends: 0,
       totalFlashesOnsights: 0,
-      hardestRoute: '',
+      hardestRouteValue: 0,
+      hardestRouteId: null,
       totalGradeValue: 0,
       totalGradeCount: 0,
       averageGradeValue: 0,
-      averageGrade: ''
+      averageGradeId: null
     },
     'Sports Climbing': {
       gradeCounts: {},
       totalAttempts: 0,
       totalSends: 0,
       totalFlashesOnsights: 0,
-      hardestRoute: '',
+      hardestRouteValue: 0,
+      hardestRouteId: null,
       totalGradeValue: 0,
       totalGradeCount: 0,
       averageGradeValue: 0,
-      averageGrade: ''
+      averageGradeId: null
     },
-    hardestFlashOnsight: { Bouldering: '', 'Sports Climbing': '' }
+    hardestFlashOnsight: { Bouldering: null, 'Sports Climbing': null }
   };
 
   const startOfMonth = new Date(year, month, 1);
@@ -751,14 +859,17 @@ function calculateMonthlyStats(year, month) {
 
   monthWorkouts.forEach(workout => {
     workout.grades.forEach(grade => {
-      if (!stats[workout.type].gradeCounts[grade.grade]) {
-        stats[workout.type].gradeCounts[grade.grade] = {
+      const gradeObj = grades.find(g => g.id === grade.gradeId && g.type === workout.type);
+      if (!gradeObj) return;
+
+      if (!stats[workout.type].gradeCounts[grade.gradeId]) {
+        stats[workout.type].gradeCounts[grade.gradeId] = {
           attempts: 0,
           sends: 0,
           flashesOnsights: 0
         };
       }
-      const gradeCountObj = stats[workout.type].gradeCounts[grade.grade];
+      const gradeCountObj = stats[workout.type].gradeCounts[grade.gradeId];
 
       gradeCountObj.attempts += grade.attempts;
       gradeCountObj.sends += grade.sends;
@@ -768,23 +879,17 @@ function calculateMonthlyStats(year, month) {
       stats[workout.type].totalSends += grade.sends;
       stats[workout.type].totalFlashesOnsights += grade.flashesOnsights;
 
-      const gradesList = workout.type === 'Bouldering' ? boulderingGrades : sportsClimbingGrades;
-      const gradeValues = workout.type === 'Bouldering' ? boulderingGradeValues : sportsClimbingGradeValues;
-      const gradeIndex = gradesList.indexOf(grade.grade);
-      const gradeValue = gradeValues[grade.grade];
+      const gradeValue = gradeObj.gradeValue;
 
       // Update hardest route
-      const currentHardestIndex = gradesList.indexOf(stats[workout.type].hardestRoute);
-      if (grade.sends > 0 && gradeIndex > currentHardestIndex) {
-        stats[workout.type].hardestRoute = grade.grade;
+      if (grade.sends > 0 && gradeValue > stats[workout.type].hardestRouteValue) {
+        stats[workout.type].hardestRouteValue = gradeValue;
+        stats[workout.type].hardestRouteId = grade.gradeId;
       }
 
       // Update hardest Flash/Onsight
-      if (grade.flashesOnsights > 0) {
-        const currentHardestFlashIndex = gradesList.indexOf(stats.hardestFlashOnsight[workout.type]);
-        if (gradeIndex > currentHardestFlashIndex) {
-          stats.hardestFlashOnsight[workout.type] = grade.grade;
-        }
+      if (grade.flashesOnsights > 0 && gradeValue > (stats.hardestFlashOnsight[workout.type]?.gradeValue || 0)) {
+        stats.hardestFlashOnsight[workout.type] = { gradeId: grade.gradeId, gradeValue };
       }
 
       // For average grade calculation
@@ -796,9 +901,8 @@ function calculateMonthlyStats(year, month) {
     if (stats[workout.type].totalGradeCount > 0) {
       stats[workout.type].averageGradeValue =
         stats[workout.type].totalGradeValue / stats[workout.type].totalGradeCount;
-      const avgIndex = Math.round(stats[workout.type].averageGradeValue) - 1;
-      const gradeList = workout.type === 'Bouldering' ? boulderingGrades : sportsClimbingGrades;
-      stats[workout.type].averageGrade = gradeList[avgIndex] || 'N/A';
+      const avgGradeValue = Math.round(stats[workout.type].averageGradeValue);
+      stats[workout.type].averageGradeId = avgGradeValue;
     }
   });
 
@@ -820,17 +924,19 @@ function renderGradeDistributionChart(type) {
   const ctx = canvas.getContext('2d');
 
   // Prepare data
-  const labels = Object.keys(gradeCounts).sort((a, b) => {
-    const gradesList = type === 'Bouldering' ? boulderingGrades : sportsClimbingGrades;
-    return gradesList.indexOf(a) - gradesList.indexOf(b);
-  });
+  const gradeIds = Object.keys(gradeCounts)
+    .map(id => parseInt(id))
+    .sort((a, b) => a - b);
+
+  const labels = gradeIds.map(id => getGradeName(id, type));
+
   const attemptsData = [];
   const sendsData = [];
   const flashesOnsightsData = [];
   const totalAttemptsPerGrade = [];
 
-  labels.forEach(grade => {
-    const counts = gradeCounts[grade];
+  gradeIds.forEach((gradeId, index) => {
+    const counts = gradeCounts[gradeId];
     const attempts = counts.attempts;
     const sends = counts.sends;
     const flashesOnsights = counts.flashesOnsights;
@@ -875,9 +981,9 @@ function renderGradeDistributionChart(type) {
       scales: {
         x: {
           stacked: true,
-          title: { display: false }, // Removed "Grades" word
+          title: { display: false },
           ticks: {
-            maxRotation: 0, // Labels written horizontally
+            maxRotation: 0,
             minRotation: 0,
             autoSkip: false,
           }
@@ -885,7 +991,7 @@ function renderGradeDistributionChart(type) {
         y: {
           stacked: true,
           ticks: {
-            display: false // Remove Y-axis ticks and labels
+            display: false
           },
           grid: {
             display: false
@@ -906,7 +1012,7 @@ function renderGradeDistributionChart(type) {
         },
         legend: { display: true }
       },
-      barThickness: 15 // Adjusted bar thickness to make bars narrower
+      barThickness: 15
     }
   });
 }
@@ -930,11 +1036,18 @@ function loadWorkoutsFromStorage() {
   }
 }
 
-// Grade Conversion Data and Functions
-function populateGradeTable() {
-  const tableBody = document.getElementById('gradeTable');
-  tableBody.innerHTML = ''; // Clear existing content
-  gradeConversionTable.forEach(grade => {
+// Populate Grade Conversion Tables
+function populateGradeConversionTables() {
+  const boulderingTableBody = document.getElementById('gradeTable');
+  const sportsClimbingTableBody = document.getElementById('sportsGradeTable');
+
+  boulderingTableBody.innerHTML = '';
+  sportsClimbingTableBody.innerHTML = '';
+
+  const boulderingGrades = grades.filter(g => g.type === 'Bouldering');
+  const sportsClimbingGrades = grades.filter(g => g.type === 'Sports Climbing');
+
+  boulderingGrades.forEach(grade => {
     const row = document.createElement('tr');
     const americanCell = document.createElement('td');
     const frenchCell = document.createElement('td');
@@ -944,93 +1057,38 @@ function populateGradeTable() {
 
     row.appendChild(americanCell);
     row.appendChild(frenchCell);
-    tableBody.appendChild(row);
+    boulderingTableBody.appendChild(row);
   });
-}
 
-function populateSportsGradeTable() {
-  const tableBody = document.getElementById('sportsGradeTable');
-  tableBody.innerHTML = ''; // Clear existing content
-  sportsGradeConversionTable.forEach(grade => {
+  sportsClimbingGrades.forEach(grade => {
     const row = document.createElement('tr');
+    const americanCell = document.createElement('td');
     const frenchCell = document.createElement('td');
-    const yosemiteCell = document.createElement('td');
 
+    americanCell.textContent = grade.american;
     frenchCell.textContent = grade.french;
-    yosemiteCell.textContent = grade.yosemite;
 
+    row.appendChild(americanCell);
     row.appendChild(frenchCell);
-    row.appendChild(yosemiteCell);
-    tableBody.appendChild(row);
+    sportsClimbingTableBody.appendChild(row);
   });
 }
-
-// Grade Conversion Data
-const gradeConversionTable = [
-  { american: "V0", french: "4" },
-  { american: "V1", french: "5" },
-  { american: "V2", french: "5+" },
-  { american: "V3", french: "6A-6A+" },
-  { american: "V4", french: "6B-6B+" },
-  { american: "V5", french: "6C-6C+" },
-  { american: "V6", french: "7A" },
-  { american: "V7", french: "7A+" },
-  { american: "V8", french: "7B-7B+" },
-  { american: "V9", french: "7C" },
-  { american: "V10", french: "7C+" },
-  { american: "V11", french: "8A" },
-  { american: "V12", french: "8A+" },
-  { american: "V13", french: "8B" },
-  { american: "V14", french: "8B+" },
-  { american: "V15", french: "8C" },
-  { american: "V16", french: "8C+" },
-  { american: "V17", french: "9A" },
-];
-
-const sportsGradeConversionTable = [
-  { french: "4a", yosemite: "5.5" },
-  { french: "4b", yosemite: "5.6" },
-  { french: "4c", yosemite: "5.7" },
-  { french: "5a", yosemite: "5.8" },
-  { french: "5b", yosemite: "5.9" },
-  { french: "5c", yosemite: "5.10a" },
-  { french: "6a", yosemite: "5.10b" },
-  { french: "6a+", yosemite: "5.10c" },
-  { french: "6b", yosemite: "5.10d" },
-  { french: "6b+", yosemite: "5.11a" },
-  { french: "6c", yosemite: "5.11b" },
-  { french: "6c+", yosemite: "5.11c" },
-  { french: "7a", yosemite: "5.11d" },
-  { french: "7a+", yosemite: "5.12a" },
-  { french: "7b", yosemite: "5.12b" },
-  { french: "7b+", yosemite: "5.12c" },
-  { french: "7c", yosemite: "5.12d" },
-  { french: "7c+", yosemite: "5.13a" },
-  { french: "8a", yosemite: "5.13b" },
-  { french: "8a+", yosemite: "5.13c" },
-  { french: "8b", yosemite: "5.13d" },
-  { french: "8b+", yosemite: "5.14a" },
-  { french: "8c", yosemite: "5.14b" },
-  { french: "8c+", yosemite: "5.14c" },
-  { french: "9a", yosemite: "5.14d" },
-  { french: "9a+", yosemite: "5.15a" },
-  { french: "9b", yosemite: "5.15b" },
-  { french: "9b+", yosemite: "5.15c" },
-  { french: "9c", yosemite: "5.15d" },
-];
 
 // Export Data Function
 function exportDataToCSV() {
   let csvContent = "data:text/csv;charset=utf-8,";
-  csvContent += "Workout ID,Date,Workout Type,Grade,Attempts,Sends,Flashes/Onsights\n"; // Header
+  csvContent += "Workout ID,Date,Workout Type,Grade (American),Grade (French),Attempts,Sends,Flashes/Onsights\n"; // Header
 
   workouts.forEach(workout => {
     workout.grades.forEach(grade => {
+      const gradeAmerican = grades.find(g => g.id === grade.gradeId && g.type === workout.type)?.american || 'N/A';
+      const gradeFrench = grades.find(g => g.id === grade.gradeId && g.type === workout.type)?.french || 'N/A';
       const row = [
         workout.id,
         workout.date.toISOString(),
         workout.type,
-        grade.grade,
+        gradeAmerican,
+        gradeFrench,
         grade.attempts,
         grade.sends,
         grade.flashesOnsights
@@ -1043,10 +1101,8 @@ function exportDataToCSV() {
   const link = document.createElement("a");
   link.setAttribute("href", encodedUri);
   link.setAttribute("download", "climbing_workouts.csv");
-  document.body.appendChild(link); // Required for FF
+  document.body.appendChild(link);
 
   link.click();
   document.body.removeChild(link);
 }
-
-// Additional adjustments or functions can be added here as needed

@@ -338,13 +338,13 @@ function setupEventListeners() {
   });
 
   // Update the Grade Conversion menu item click event
-document.getElementById('gradeConversionItem').addEventListener('click', () => {
-  // Open the grade_conversion.html file in a new window or tab
-  window.open('grade_conversion.html', '_blank');
+  document.getElementById('gradeConversionItem').addEventListener('click', () => {
+    // Open the grade_conversion.html file in a new window or tab
+    window.open('grade_conversion.html', '_blank');
 
-  // Close the side menu
-  document.getElementById('sideMenu').classList.remove('open');
-});
+    // Close the side menu
+    document.getElementById('sideMenu').classList.remove('open');
+  });
 }
 
 // Switch Tabs
@@ -761,7 +761,14 @@ function updateStatistics() {
 
   // Function to display stats as cards
   function displayStats(type, statsEl) {
+    const canvas = document.getElementById(
+      type === 'Bouldering' ? 'bouldering-grade-chart' : 'sports-climbing-grade-chart'
+    );
+
     if (monthlyStats[type] && monthlyStats[type].totalAttempts > 0) {
+      // Show the canvas element
+      canvas.style.display = 'block';
+
       const statsCards = document.createElement('div');
       statsCards.classList.add('stats-cards');
 
@@ -802,6 +809,9 @@ function updateStatistics() {
       const noData = document.createElement('p');
       noData.textContent = 'No data for this month.';
       statsEl.appendChild(noData);
+
+      // Hide the canvas element
+      canvas.style.display = 'none';
     }
   }
 
@@ -931,6 +941,11 @@ function renderGradeDistributionChart(type) {
     .map(id => parseInt(id))
     .sort((a, b) => a - b);
 
+  if (gradeIds.length === 0) {
+    // No data to display
+    return;
+  }
+
   const labels = gradeIds.map(id => getGradeName(id, type));
 
   const attemptsData = [];
@@ -956,6 +971,10 @@ function renderGradeDistributionChart(type) {
   if (canvas.chart) {
     canvas.chart.destroy();
   }
+
+  // Calculate the maximum total attempts for Y-axis scaling
+  const maxTotalAttempts = Math.max(...totalAttemptsPerGrade);
+  const maxYValue = maxTotalAttempts;
 
   // Create stacked bar chart
   canvas.chart = new Chart(ctx, {
@@ -994,7 +1013,8 @@ function renderGradeDistributionChart(type) {
         y: {
           stacked: true,
           ticks: {
-            display: false
+            display: false,
+            max: maxYValue + 2 // Add extra space above the tallest bar
           },
           grid: {
             display: false,
@@ -1015,6 +1035,11 @@ function renderGradeDistributionChart(type) {
           }
         },
         legend: { display: false } // Remove legend
+      },
+      layout: {
+        padding: {
+          top: 20 // Adjust the padding value as needed
+        }
       },
       barThickness: 15
     }

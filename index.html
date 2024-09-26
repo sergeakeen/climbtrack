@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <title>Climb Tracker</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Version marker for version control FIX MENU BUG-->
+  <!-- Version marker for version control -->
   <meta name="version" content="0.8.9">
   <!-- Link to manifest.json -->
   <link rel="manifest" href="manifest.json">
@@ -20,20 +20,17 @@
 </head>
 <body>
   <div class="container">
-    <!-- App Header -->
-    <header class="app-header">
-      <button id="burgerMenu" class="burger-menu">
-        <i class="fas fa-bars burger-icon"></i>
-      </button>
-      <h1>Climb Tracker</h1>
-    </header>
-
     <!-- Calendar Section -->
     <div class="calendar-container">
       <div class="calendar-header">
-        <button id="prev-month" class="month-nav">&lt;</button>
-        <h2 id="month-year"></h2>
-        <button id="next-month" class="month-nav">&gt;</button>
+        <div class="calendar-nav">
+          <h2 id="month-year"></h2><button id="prev-month" class="month-nav">&lt;</button>
+         
+          <button id="next-month" class="month-nav">&gt;</button>
+        </div>
+        <button id="burgerMenu" class="burger-menu">
+          <i class="fas fa-bars burger-icon"></i>
+        </button>
       </div>
       <div id="calendar"></div>
     </div>

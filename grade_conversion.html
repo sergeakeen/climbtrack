@@ -12,6 +12,7 @@
       --text-color: #333;
       --border-color: #e2e8f0;
       --hover-color: #f1f5f9;
+      --close-button-size: 24px;
     }
     
     body {
@@ -19,36 +20,56 @@
       font-family: 'Inter', sans-serif;
       background: linear-gradient(135deg, var(--background-color), #ffffff);
       color: var(--text-color);
-      line-height: 1.6;
+      line-height: 1.4;
+      font-size: 14px;
     }
     
     .container {
-      max-width: 1000px;
+      max-width: 100%;
       margin: 0 auto;
-      padding: 40px 20px;
+      padding: 20px 10px;
+      position: relative; /* For positioning the close button */
     }
     
     h1 {
       text-align: center;
       color: var(--primary-color);
-      margin-bottom: 40px;
+      margin-bottom: 20px;
       font-weight: 700;
-      font-size: 2.5rem;
+      font-size: 1.5rem;
       letter-spacing: -0.5px;
+    }
+    
+    /* Close Button Styles */
+    .close-button {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: none;
+      border: none;
+      font-size: var(--close-button-size);
+      color: var(--primary-color);
+      cursor: pointer;
+      font-weight: 700;
+      line-height: 1;
+    }
+    
+    .close-button:hover {
+      color: #553c9a;
     }
     
     .conversion-tables {
       display: flex;
       flex-direction: row;
       justify-content: space-between;
-      gap: 40px;
+      gap: 10px;
     }
     
     .table-container {
       flex: 1;
       background-color: #ffffff;
-      border-radius: 12px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       overflow: hidden;
     }
     
@@ -57,9 +78,9 @@
       color: #ffffff;
       background-color: var(--primary-color);
       margin: 0;
-      padding: 20px;
+      padding: 10px;
       font-weight: 600;
-      font-size: 1.5rem;
+      font-size: 1rem;
     }
     
     table {
@@ -69,9 +90,10 @@
     }
     
     th, td {
-      padding: 12px 16px;
+      padding: 6px 8px;
       text-align: left;
       border-bottom: 1px solid var(--border-color);
+      font-size: 0.75rem;
     }
     
     th {
@@ -79,8 +101,8 @@
       color: var(--primary-color);
       font-weight: 600;
       text-transform: uppercase;
-      font-size: 0.875rem;
-      letter-spacing: 0.5px;
+      font-size: 0.7rem;
+      letter-spacing: 0.3px;
     }
     
     tr:nth-child(even) {
@@ -95,19 +117,27 @@
       border-bottom: none;
     }
     
-    @media (max-width: 768px) {
+    @media (max-width: 600px) {
       .conversion-tables {
         flex-direction: column;
       }
       
       .table-container {
-        margin-bottom: 30px;
+        margin-bottom: 20px;
+      }
+      
+      .close-button {
+        top: 10px;
+        right: 10px;
       }
     }
   </style>
 </head>
 <body>
   <div class="container">
+    <!-- Close Button -->
+    <button class="close-button" aria-label="Close" onclick="navigateBack()">×</button>
+    
     <h1>Grade Conversion Tables</h1>
     <div class="conversion-tables">
       <div class="table-container">
@@ -184,5 +214,18 @@
       </div>
     </div>
   </div>
+  
+  <!-- Inline JavaScript for Close Button Functionality -->
+  <script>
+    function navigateBack() {
+      // Attempt to close the window if it was opened via script
+      if (window.history.length > 1) {
+        window.history.back();
+      } else {
+        // If not, redirect to index.html
+        window.location.href = 'index.html';
+      }
+    }
+  </script>
 </body>
 </html>

@@ -92,7 +92,6 @@ document.addEventListener('DOMContentLoaded', () => {
   renderCalendar();
   updateStatistics();
   setupEventListeners();
-  populateGradeConversionTables();
 
   // Set the grading system toggle based on the preference
   const gradingSystemToggle = document.getElementById('gradingSystemToggle');
@@ -330,7 +329,6 @@ function setupEventListeners() {
     saveGradingSystemPreference();
     renderCalendar();
     updateStatistics();
-    openModal('gradeConversionModal'); // Optional: Show conversion modal on change
   });
 
   // Export Data
@@ -339,11 +337,14 @@ function setupEventListeners() {
     document.getElementById('sideMenu').classList.remove('open');
   });
 
-  // Grade Conversion
-  document.getElementById('gradeConversionItem').addEventListener('click', () => {
-    openModal('gradeConversionModal');
-    document.getElementById('sideMenu').classList.remove('open');
-  });
+  // Update the Grade Conversion menu item click event
+document.getElementById('gradeConversionItem').addEventListener('click', () => {
+  // Open the grade_conversion.html file in a new window or tab
+  window.open('grade_conversion.html', '_blank');
+
+  // Close the side menu
+  document.getElementById('sideMenu').classList.remove('open');
+});
 }
 
 // Switch Tabs
@@ -1037,44 +1038,6 @@ function loadWorkoutsFromStorage() {
       date: new Date(workout.date)
     }));
   }
-}
-
-// Populate Grade Conversion Tables
-function populateGradeConversionTables() {
-  const boulderingTableBody = document.getElementById('gradeTable');
-  const sportsClimbingTableBody = document.getElementById('sportsGradeTable');
-
-  boulderingTableBody.innerHTML = '';
-  sportsClimbingTableBody.innerHTML = '';
-
-  const boulderingGrades = grades.filter(g => g.type === 'Bouldering');
-  const sportsClimbingGrades = grades.filter(g => g.type === 'Sports Climbing');
-
-  boulderingGrades.forEach(grade => {
-    const row = document.createElement('tr');
-    const americanCell = document.createElement('td');
-    const frenchCell = document.createElement('td');
-
-    americanCell.textContent = grade.american;
-    frenchCell.textContent = grade.french;
-
-    row.appendChild(americanCell);
-    row.appendChild(frenchCell);
-    boulderingTableBody.appendChild(row);
-  });
-
-  sportsClimbingGrades.forEach(grade => {
-    const row = document.createElement('tr');
-    const americanCell = document.createElement('td');
-    const frenchCell = document.createElement('td');
-
-    americanCell.textContent = grade.american;
-    frenchCell.textContent = grade.french;
-
-    row.appendChild(americanCell);
-    row.appendChild(frenchCell);
-    sportsClimbingTableBody.appendChild(row);
-  });
 }
 
 // Export Data Function

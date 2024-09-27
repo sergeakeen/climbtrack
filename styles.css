@@ -29,54 +29,42 @@ h3 {
 
 /* Calendar Styles */
 .calendar-container {
-  margin-top: 20px; /* Adjust as needed since the header is removed */
+  margin-top: 20px;
   margin-bottom: 20px;
 }
 
 .calendar-header {
+  background-color: #6b46c1; /* Main theme color */
+  color: white;
+  padding: 16px;
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  margin-bottom: 10px; /* Adjust as needed */
-}
-
-/* Style for the navigation arrows and month name */
-.calendar-nav {
-  display: flex;
   align-items: center;
+  border-radius: 4px;
+  margin-bottom: 5pt;
 }
 
-.month-nav {
-  background-color: #fff;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  font-size: 18px;
+.nav-button, .menu-button {
+  background: none;
+  border: none;
+  color: white;
   cursor: pointer;
-  padding: 10px;
-  margin-right: 5px;
+  padding: 4px;
+  border-radius: 4px;
 }
 
-.month-nav:hover {
-  background-color: #f0f0f0;
+.nav-button:hover, .menu-button:hover {
+  background-color: rgba(255, 255, 255, 0.2);
 }
 
-#month-year {
+.menu-button {
+  margin-left: 8px;
+}
+
+.month-display {
   font-size: 20px;
   font-weight: bold;
   font-variant: small-caps;
-  color: #6b46c1;
-}
-
-/* Adjust burger menu position */
-.burger-menu {
-  background: none;
-  border: none;
-  cursor: pointer;
-}
-
-.burger-icon {
-  font-size: 24px;
-  color: #6b46c1;
 }
 
 #calendar {
@@ -242,7 +230,7 @@ h3 {
   background-color: #f3f4f6;
   border-radius: 8px;
   padding: 15px;
-  text-align: center;
+  text-align: left;
   flex: 1 1 calc(33.333% - 10px);
   box-sizing: border-box;
 }
@@ -254,7 +242,7 @@ h3 {
 }
 
 .stat-card p {
-  color: #6b46c1;
+  color: #5f4c85;
   font-size: 24px;
   font-weight: bold;
   margin: 0;
@@ -425,6 +413,20 @@ h3 {
   margin: 5px 0;
 }
 
+.stats-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b46c1;
+  margin-bottom: 20px;
+  font-variant: small-caps;
+}
+
+.stats-header i {
+  margin-right: 8px;
+  font-size: 24px;
+}
+
 .workout-summary-buttons {
   display: flex;
   gap: 10px;
@@ -577,5 +579,10 @@ tr:nth-child(even) {
 
   .modal-content {
     margin: 100px auto;
+  }
+}
+@media (max-width: 600px) {
+  .stats-container canvas {
+    min-height: 300px; /* Increase as needed */
   }
 }

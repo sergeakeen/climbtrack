@@ -785,10 +785,11 @@ function updateStatistics() {
         `Hardest ${type === 'Bouldering' ? 'Flash' : 'Onsight'}`,
         hardestFlashOnsightGrade
       );
+      const hardestRouteTitle = type === 'Bouldering' ? 'Hardest Boulder' : 'Hardest Route';
       const hardestRouteGrade = monthlyStats[type].hardestRouteId
         ? getGradeName(monthlyStats[type].hardestRouteId, type)
         : 'N/A';
-      const hardestRouteCard = createStatCard('Hardest Route', hardestRouteGrade);
+      const hardestRouteCard = createStatCard(hardestRouteTitle, hardestRouteGrade);
       const averageGradeName = monthlyStats[type].averageGradeId
         ? getGradeName(monthlyStats[type].averageGradeId, type)
         : 'N/A';

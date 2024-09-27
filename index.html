@@ -22,22 +22,40 @@
   <div class="container">
     <!-- Calendar Section -->
     <div class="calendar-container">
-      <div class="calendar-header">
-        <div class="calendar-nav">
-          <h2 id="month-year"></h2><button id="prev-month" class="month-nav">&lt;</button>
-         
-          <button id="next-month" class="month-nav">&gt;</button>
-        </div>
-        <button id="burgerMenu" class="burger-menu">
-          <i class="fas fa-bars burger-icon"></i>
+      <header class="calendar-header">
+        <button id="prev-month" class="nav-button" aria-label="Previous month">
+          <!-- SVG for left arrow -->
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
         </button>
-      </div>
+        <div id="month-year" class="month-display"></div>
+        <div>
+          <button id="next-month" class="nav-button" aria-label="Next month">
+            <!-- SVG for right arrow -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </button>
+          <button id="burgerMenu" class="menu-button" aria-label="More options">
+            <!-- SVG for menu -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="1"></circle>
+              <circle cx="12" cy="5" r="1"></circle>
+              <circle cx="12" cy="19" r="1"></circle>
+            </svg>
+          </button>
+        </div>
+      </header>
       <div id="calendar"></div>
     </div>
 
     <!-- Monthly Statistics -->
     <div class="stats-container">
-      <h2>Monthly Statistics</h2>
+      <h2 class="stats-header">
+        <i class="fas fa-chart-line"></i>
+        Monthly Stats
+      </h2>
       <div class="tabs">
         <button class="tab-button active" data-tab="bouldering">Bouldering</button>
         <button class="tab-button" data-tab="sports-climbing">Sports Climbing</button>

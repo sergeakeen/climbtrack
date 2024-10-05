@@ -58,17 +58,21 @@
       </h2>
       <div class="tabs">
         <button class="tab-button active" data-tab="bouldering">Bouldering</button>
-        <button class="tab-button" data-tab="sports-climbing">Sports Climbing</button>
+        <button class="tab-button" data-tab="sport-climbing">Sport Climbing</button>
       </div>
       <div class="tab-content active" id="bouldering-stats">
         <div id="bouldering-stats-content" class="stats-cards"></div>
         <!-- Canvas for Bouldering Grade Chart -->
-        <canvas id="bouldering-grade-chart"></canvas>
+        <div class="chart-container">
+          <canvas id="bouldering-grade-chart"></canvas>
+        </div>
       </div>
-      <div class="tab-content" id="sports-climbing-stats">
-        <div id="sports-climbing-stats-content" class="stats-cards"></div>
-        <!-- Canvas for Sports Climbing Grade Chart -->
-        <canvas id="sports-climbing-grade-chart"></canvas>
+      <div class="tab-content" id="sport-climbing-stats">
+        <div id="sport-climbing-stats-content" class="stats-cards"></div>
+        <!-- Canvas for Sport Climbing Grade Chart -->
+        <div class="chart-container">
+          <canvas id="sport-climbing-grade-chart"></canvas>
+        </div>
       </div>
     </div>
   </div>
@@ -102,7 +106,7 @@
       <h2>Select Session</h2>
       <div class="modal-buttons">
         <button id="select-bouldering" class="modal-button">Bouldering</button>
-        <button id="select-sports-climbing" class="modal-button">Sports Climbing</button>
+        <button id="select-sport-climbing" class="modal-button">Sport Climbing</button>
       </div>
     </div>
   </div>
@@ -123,7 +127,7 @@
       <span class="close-button" data-close="workout-summary-modal">&times;</span>
       <h2>Workout Summary</h2>
       <div id="workout-summary-content"></div>
-      <button id="add-another-workout-button" class="modal-button">Add Another Workout</button>
+      <button id="add-another-workout-button" class="modal-button">Add Another Session</button>
     </div>
   </div>
 

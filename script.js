@@ -364,10 +364,12 @@ function switchTab(tab) {
   document.getElementById(`${tab}-stats`).classList.add('active');
 }
 
-// Open Grade Selection Modal
 function openGradeSelectionModal() {
   if (editingWorkoutId) {
-    currentWorkout = workouts.find(w => w.id === editingWorkoutId);
+    // Deep copy the existing workout to avoid modifying the original before saving
+    currentWorkout = JSON.parse(JSON.stringify(workouts.find(w => w.id === editingWorkoutId)));
+    // Convert date strings back to Date objects
+    currentWorkout.date = new Date(currentWorkout.date);
   } else {
     currentWorkout = {
       id: Date.now().toString(),
@@ -384,9 +386,29 @@ function openGradeSelectionModal() {
   gradeList.innerHTML = '';
 
   // Get grades for the selected workout type and grading system
-  const gradeOptions = grades.filter(g => g.type === selectedWorkoutType && g.original.toLowerCase() === gradingSystem.toLowerCase());
+  const gradeOptions = grades.filter(
+    g => g.type === selectedWorkoutType && g.original.toLowerCase() === gradingSystem.toLowerCase()
+  );
 
-  gradeOptions.forEach((gradeObj, index) => {
+  // Map existing grades by gradeId for quick lookup
+  const existingGradesMap = {};
+  currentWorkout.grades.forEach(grade => {
+    existingGradesMap[grade.gradeId] = grade;
+  });
+
+  currentWorkout.grades = []; // Reset grades array to prevent duplication
+
+  gradeOptions.forEach((gradeObj) => {
+    // Use existing grade data if available
+    let gradeData = existingGradesMap[gradeObj.id] || {
+      gradeId: gradeObj.id,
+      attempts: 0,
+      sends: 0,
+      flashesOnsights: 0
+    };
+
+    currentWorkout.grades.push(gradeData);
+
     // Create gradeItem
     const gradeItem = document.createElement('div');
     gradeItem.classList.add('grade-item', 'closed'); // Start as closed
@@ -413,41 +435,25 @@ function openGradeSelectionModal() {
     const labels = ['Attempts', 'Sends', selectedWorkoutType === 'Bouldering' ? 'Flashes' : 'Onsights'];
     const countElements = []; // To store the count display elements
 
-    labels.forEach((label, idx) => {
+    labels.forEach((label) => {
       const controlGroup = document.createElement('div');
       controlGroup.classList.add('control-group');
-
+    
       const gradeLabel = document.createElement('span');
       gradeLabel.classList.add('grade-label');
       gradeLabel.textContent = label;
-
+    
       const gradeInput = document.createElement('div');
       gradeInput.classList.add('grade-input');
-
+    
       const decrementButton = document.createElement('button');
       decrementButton.classList.add('control-button', 'styled-button');
       decrementButton.textContent = '-';
       decrementButton.type = 'button'; // Ensure type is button
-
+    
       const countDisplay = document.createElement('span');
       countDisplay.classList.add('count-display');
-      countDisplay.textContent = '0'; // Initial count
-
-      const incrementButton = document.createElement('button');
-      incrementButton.classList.add('control-button', 'styled-button');
-      incrementButton.textContent = '+';
-      incrementButton.type = 'button'; // Ensure type is button
-
-      gradeInput.appendChild(decrementButton);
-      gradeInput.appendChild(countDisplay);
-      gradeInput.appendChild(incrementButton);
-
-      controlGroup.appendChild(gradeLabel);
-      controlGroup.appendChild(gradeInput);
-      gradeControls.appendChild(controlGroup);
-
-      countElements.push(countDisplay);
-
+    
       // Determine the field type based on label
       let fieldType;
       if (label === 'Attempts') {
@@ -457,20 +463,39 @@ function openGradeSelectionModal() {
       } else {
         fieldType = 'flashesOnsights'; // 'Flashes' or 'Onsights'
       }
-
+    
+      // Set countDisplay.textContent to the existing value in gradeData
+      countDisplay.textContent = gradeData[fieldType] || '0';
+    
+      const incrementButton = document.createElement('button');
+      incrementButton.classList.add('control-button', 'styled-button');
+      incrementButton.textContent = '+';
+      incrementButton.type = 'button'; // Ensure type is button
+    
+      gradeInput.appendChild(decrementButton);
+      gradeInput.appendChild(countDisplay);
+      gradeInput.appendChild(incrementButton);
+    
+      controlGroup.appendChild(gradeLabel);
+      controlGroup.appendChild(gradeInput);
+      gradeControls.appendChild(controlGroup);
+    
+      countElements.push(countDisplay);
+    
       // Event Listeners for Increment/Decrement
       decrementButton.addEventListener('click', () => {
         let currentValue = parseInt(countDisplay.textContent) || 0;
         countDisplay.textContent = Math.max(0, currentValue - 1);
         updateGradeData(fieldType, gradeData, countElements);
       });
-
+    
       incrementButton.addEventListener('click', () => {
         let currentValue = parseInt(countDisplay.textContent) || 0;
         countDisplay.textContent = currentValue + 1;
         updateGradeData(fieldType, gradeData, countElements);
       });
     });
+    
 
     // Error Message
     const errorMessage = document.createElement('div');
@@ -479,32 +504,6 @@ function openGradeSelectionModal() {
 
     gradeItem.appendChild(gradeControls);
     gradeList.appendChild(gradeItem);
-
-    // Initialize grade data
-    let gradeData = {
-      gradeId: gradeObj.id,
-      attempts: 0,
-      sends: 0,
-      flashesOnsights: 0
-    };
-
-    // If editing, load existing data
-    let existingGrade;
-    if (editingWorkoutId) {
-      existingGrade = currentWorkout.grades.find(g => g.gradeId === gradeObj.id);
-    }
-
-    if (existingGrade) {
-      gradeData.attempts = existingGrade.attempts || 0;
-      gradeData.sends = existingGrade.sends || 0;
-      gradeData.flashesOnsights = existingGrade.flashesOnsights || 0;
-      countElements[0].textContent = gradeData.attempts;
-      countElements[1].textContent = gradeData.sends;
-      countElements[2].textContent = gradeData.flashesOnsights;
-      validateInputs();
-    }
-
-    currentWorkout.grades.push(gradeData);
 
     // Event Listener for Grade Header Click (Expand/Collapse)
     gradeHeader.addEventListener('click', () => {
@@ -569,6 +568,7 @@ function openGradeSelectionModal() {
 
   openModal('grade-selection-modal');
 }
+
 
 // Save Workout
 function saveWorkout() {
@@ -1012,12 +1012,22 @@ function renderGradeDistributionChart(type) {
 
 // Local Storage Functions
 function saveWorkoutsToStorage() {
-  const workoutsData = workouts.map(workout => ({
-    ...workout,
-    date: workout.date.toISOString()
-  }));
+  const workoutsData = workouts.map(workout => {
+    // Ensure workout.date is a Date object
+    let date = workout.date;
+    if (!(date instanceof Date)) {
+      date = new Date(date);
+    }
+
+    return {
+      ...workout,
+      date: date.toISOString()
+    };
+  });
   localStorage.setItem('workouts', JSON.stringify(workoutsData));
 }
+
+
 
 function loadWorkoutsFromStorage() {
   const storedData = localStorage.getItem('workouts');
@@ -1029,26 +1039,32 @@ function loadWorkoutsFromStorage() {
   }
 }
 
-// Export Data Function
 function exportDataToCSV() {
   let csvContent = "data:text/csv;charset=utf-8,";
   csvContent += "Workout ID,Date,Workout Type,Grade (American),Grade (French),Attempts,Sends,Flashes/Onsights\n"; // Header
 
   workouts.forEach(workout => {
     workout.grades.forEach(grade => {
-      const gradeAmerican = grades.find(g => g.id === grade.gradeId && g.type === workout.type && g.original === 'american')?.american || '-';
-      const gradeFrench = grades.find(g => g.id === grade.gradeId && g.type === workout.type && g.original === 'french')?.french || '-';
-      const row = [
-        workout.id,
-        workout.date.toISOString(),
-        workout.type,
-        gradeAmerican,
-        gradeFrench,
-        grade.attempts,
-        grade.sends,
-        grade.flashesOnsights
-      ];
-      csvContent += row.join(",") + "\n";
+      // Only include grades with attempts > 0
+      if (grade.attempts > 0) {
+        const gradeAmerican = grades.find(
+          g => g.id === grade.gradeId && g.type === workout.type && g.original === 'american'
+        )?.american || '-';
+        const gradeFrench = grades.find(
+          g => g.id === grade.gradeId && g.type === workout.type && g.original === 'french'
+        )?.french || '-';
+        const row = [
+          workout.id,
+          workout.date.toISOString(),
+          workout.type,
+          gradeAmerican,
+          gradeFrench,
+          grade.attempts,
+          grade.sends,
+          grade.flashesOnsights
+        ];
+        csvContent += row.join(",") + "\n";
+      }
     });
   });
 
@@ -1061,6 +1077,7 @@ function exportDataToCSV() {
   link.click();
   document.body.removeChild(link);
 }
+
 
 // Import Data Function
 function importDataFromCSV() {

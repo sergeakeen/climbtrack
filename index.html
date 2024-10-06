@@ -29,23 +29,24 @@
             <polyline points="15 18 9 12 15 6"></polyline>
           </svg>
         </button>
+        
         <div id="month-year" class="month-display"></div>
-        <div>
-          <button id="next-month" class="nav-button" aria-label="Next month">
-            <!-- SVG for right arrow -->
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="9 18 15 12 9 6"></polyline>
-            </svg>
-          </button>
-          <button id="burgerMenu" class="menu-button" aria-label="More options">
-            <!-- SVG for menu -->
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="1"></circle>
-              <circle cx="12" cy="5" r="1"></circle>
-              <circle cx="12" cy="19" r="1"></circle>
-            </svg>
-          </button>
-        </div>
+        
+        <button id="next-month" class="nav-button" aria-label="Next month">
+          <!-- SVG for right arrow -->
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </button>
+        
+        <button id="burgerMenu" class="menu-button" aria-label="More options">
+          <!-- SVG for menu -->
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="1"></circle>
+            <circle cx="12" cy="5" r="1"></circle>
+            <circle cx="12" cy="19" r="1"></circle>
+          </svg>
+        </button>
       </header>
       <div id="calendar"></div>
     </div>
@@ -82,6 +83,10 @@
     <div class="menu-item" id="exportDataItem">
       <i class="fas fa-file-export menu-icon"></i>
       <span>Export Data</span>
+    </div>
+    <div class="menu-item" id="importDataItem">
+      <i class="fas fa-file-import menu-icon"></i>
+      <span>Import Data</span>
     </div>
     <div class="menu-item" id="gradeConversionItem">
       <i class="fas fa-chart-bar menu-icon"></i>

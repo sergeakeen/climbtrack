@@ -38,10 +38,21 @@ h3 {
   color: white;
   padding: 16px;
   display: flex;
-  justify-content: space-between;
   align-items: center;
   border-radius: 4px;
   margin-bottom: 5pt;
+}
+
+.calendar-header > button {
+  margin-right: 10px;
+}
+
+.month-display {
+  flex-grow: 1;
+  text-align: center;
+  font-size: 20px;
+  font-weight: bold;
+  font-variant: small-caps;
 }
 
 .nav-button,
@@ -57,16 +68,6 @@ h3 {
 .nav-button:hover,
 .menu-button:hover {
   background-color: rgba(255, 255, 255, 0.2);
-}
-
-.menu-button {
-  margin-left: 8px;
-}
-
-.month-display {
-  font-size: 20px;
-  font-weight: bold;
-  font-variant: small-caps;
 }
 
 #calendar {
@@ -148,7 +149,7 @@ h3 {
 }
 
 .bouldering-dot {
-  background-color: #6b46c1; /* Main theme color */
+  background-color: #abe2df; /* Main theme color */
 }
 
 .sport-climbing-dot {
@@ -310,7 +311,7 @@ h3 {
 
 .save-button {
   display: block;
-  margin: 0 auto 20px auto;
+  margin: 20px auto;
   padding: 10px 20px;
   background-color: #6b46c1;
   color: #fff;
@@ -332,60 +333,86 @@ h3 {
 }
 
 .grade-item {
-  display: flex;
-  flex-direction: column;
-  padding: 10px 0;
   border-bottom: 1px solid #ddd;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
 }
 
-.grade-item:last-child {
-  border-bottom: none;
+.grade-item.closed {
+  max-height: 50px; /* Height of the header */
 }
 
-.grade-controls {
+.grade-header {
   display: flex;
-  flex-direction: column;
-  margin-top: 5px;
-}
-
-.control-group {
-  display: flex;
+  justify-content: space-between;
   align-items: center;
-  margin-bottom: 5px;
-}
-
-.control-group label {
-  flex: 1;
-  font-variant: small-caps;
-}
-
-.controls {
-  display: flex;
-  align-items: center;
-}
-
-.control-button {
-  padding: 5px;
-  background-color: #6b46c1;
-  color: #fff;
-  border: none;
-  border-radius: 4px;
+  padding: 10px;
   cursor: pointer;
 }
 
-.control-button:hover {
-  background-color: #553c9a;
+.grade-title {
+  font-size: 1rem;
+  font-weight: bold;
 }
 
-.control-display {
+.grade-controls {
+  padding: 10px;
+  background-color: #f9fafb;
+}
+
+.grade-controls .control-group {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.grade-controls .control-group:last-child {
+  margin-bottom: 0;
+}
+
+.grade-controls .grade-label {
+  font-size: 0.9rem;
+}
+
+.grade-controls .grade-input {
+  display: flex;
+  align-items: center;
+}
+
+.count-display {
   width: 30px;
   text-align: center;
+  font-size: 1rem;
   margin: 0 5px;
 }
 
 .error-message {
   color: red;
   font-size: 12px;
+}
+
+.toggle-icon {
+  transition: transform 0.3s ease;
+}
+
+.grade-item.closed .toggle-icon {
+  transform: rotate(-90deg);
+}
+
+/* Styled Button */
+.styled-button {
+  background-color: #6b46c1;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 5px 10px;
+}
+
+.styled-button:hover {
+  background-color: #553c9a;
 }
 
 /* Workout Summary Styles */
@@ -547,40 +574,6 @@ input:checked + .slider:before {
   transform: translateX(26px);
 }
 
-/* Table Styles */
-.table-container {
-  max-height: 400px;
-  overflow-y: auto;
-  margin-bottom: 20px;
-}
-
-.table-container h3 {
-  text-align: center;
-  font-variant: small-caps;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-th,
-td {
-  padding: 10px;
-  text-align: left;
-  border-bottom: 1px solid #ddd;
-}
-
-th {
-  background-color: #f2f2f2;
-  font-weight: bold;
-  font-variant: small-caps;
-}
-
-tr:nth-child(even) {
-  background-color: #f8f8f8;
-}
-
 /* Responsive Styles */
 @media (min-width: 600px) {
   .container {
@@ -594,8 +587,17 @@ tr:nth-child(even) {
 
 @media (max-width: 600px) {
   .stats-cards .stat-card {
-    flex: 1 1 calc(50% - 10px); /* Adjust for 2 cards per row on mobile */
+    padding: 10px; /* Reduced padding for smaller cards */
   }
+  
+  .stat-card h3 {
+    font-size: 12px; /* Smaller font size for titles */
+  }
+  
+  .stat-card p {
+    font-size: 18px; /* Smaller font size for values */
+  }
+
 
   .chart-container {
     height: 400px; /* Increase height for mobile */
@@ -604,83 +606,4 @@ tr:nth-child(even) {
   .tab-button {
     font-size: 14px;
   }
-}
-.grade-list {
-  max-height: 400px;
-  overflow-y: auto;
-  margin-top: 10px;
-}
-
-/* Grade Item Styles */
-.grade-item {
-  border-bottom: 1px solid #ddd;
-  overflow: hidden;
-  transition: max-height 0.3s ease;
-}
-
-.grade-item.closed {
-  max-height: 50px; /* Height of the header */
-}
-
-.grade-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px;
-  cursor: pointer;
-}
-
-.grade-title {
-  font-size: 1rem;
-  font-weight: bold;
-}
-
-.grade-controls {
-  padding: 10px;
-  background-color: #f9fafb;
-}
-
-.grade-controls .control-group {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-}
-
-.grade-controls .control-group:last-child {
-  margin-bottom: 0;
-}
-
-.grade-controls .grade-label {
-  font-size: 0.9rem;
-}
-
-.grade-controls .grade-input {
-  display: flex;
-  align-items: center;
-}
-
-.grade-controls .grade-input button {
-  width: 30px;
-  height: 30px;
-  font-size: 1rem;
-  border: 1px solid #ddd;
-  background-color: #fff;
-  cursor: pointer;
-}
-
-.grade-controls .grade-input input {
-  width: 50px;
-  text-align: center;
-  border: 1px solid #ddd;
-  margin: 0 5px;
-  font-size: 1rem;
-}
-
-.toggle-icon {
-  transition: transform 0.3s ease;
-}
-
-.grade-item.closed .toggle-icon {
-  transform: rotate(-90deg);
 }

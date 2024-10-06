@@ -1,6 +1,8 @@
-// script.js
-
 import { grades } from './grades.js';
+
+// DEV toggle: set to 1 to show import/export menu, 0 to hide
+const DEV = 1; // Default is 1
+
 // Grading system preference
 let gradingSystem = 'American'; // Default to American
 
@@ -20,7 +22,7 @@ function saveGradingSystemPreference() {
 // Get Grade Name
 function getGradeName(gradeId) {
   const grade = grades.find(g => g.id === gradeId);
-  if (!grade) return 'N/A';
+  if (!grade) return '-';
 
   // Find the grade with the same gradeValue and type in the current grading system
   const gradeInCurrentSystem = grades.find(
@@ -30,7 +32,7 @@ function getGradeName(gradeId) {
       g.original.toLowerCase() === gradingSystem.toLowerCase()
   );
 
-  if (!gradeInCurrentSystem) return 'N/A';
+  if (!gradeInCurrentSystem) return '-';
 
   return gradingSystem === 'American' ? gradeInCurrentSystem.american : gradeInCurrentSystem.french;
 }
@@ -55,6 +57,15 @@ document.addEventListener('DOMContentLoaded', () => {
   // Set the grading system toggle based on the preference
   const gradingSystemToggle = document.getElementById('gradingSystemToggle');
   gradingSystemToggle.checked = gradingSystem === 'French';
+
+  // Show or hide import/export menu items based on DEV toggle
+  if (DEV === 1) {
+    document.getElementById('exportDataItem').style.display = 'flex';
+    document.getElementById('importDataItem').style.display = 'flex';
+  } else {
+    document.getElementById('exportDataItem').style.display = 'none';
+    document.getElementById('importDataItem').style.display = 'none';
+  }
 });
 
 // Data Migration Function
@@ -324,6 +335,12 @@ function setupEventListeners() {
     document.getElementById('sideMenu').classList.remove('open');
   });
 
+  // Import Data
+  document.getElementById('importDataItem').addEventListener('click', () => {
+    importDataFromCSV();
+    document.getElementById('sideMenu').classList.remove('open');
+  });
+
   // Grade Conversion Menu Item
   document.getElementById('gradeConversionItem').addEventListener('click', () => {
     window.open('grade_conversion.html', '_blank');
@@ -344,7 +361,6 @@ function switchTab(tab) {
   document.getElementById(`${tab}-stats`).classList.add('active');
 }
 
-// Open Grade Selection Modal
 // Open Grade Selection Modal
 function openGradeSelectionModal() {
   if (editingWorkoutId) {
@@ -406,7 +422,7 @@ function openGradeSelectionModal() {
       gradeInput.classList.add('grade-input');
 
       const decrementButton = document.createElement('button');
-      decrementButton.classList.add('control-button');
+      decrementButton.classList.add('control-button', 'styled-button');
       decrementButton.textContent = '-';
       decrementButton.type = 'button'; // Ensure type is button
 
@@ -415,7 +431,7 @@ function openGradeSelectionModal() {
       countDisplay.textContent = '0'; // Initial count
 
       const incrementButton = document.createElement('button');
-      incrementButton.classList.add('control-button');
+      incrementButton.classList.add('control-button', 'styled-button');
       incrementButton.textContent = '+';
       incrementButton.type = 'button'; // Ensure type is button
 
@@ -550,9 +566,6 @@ function openGradeSelectionModal() {
 
   openModal('grade-selection-modal');
 }
-
-
-
 
 // Save Workout
 function saveWorkout() {
@@ -718,20 +731,20 @@ function updateStatistics() {
         monthlyStats[type].totalFlashesOnsights
       );
       const hardestFlashOnsightGrade = monthlyStats.hardestFlashOnsight[type]
-        ? getGradeName(monthlyStats.hardestFlashOnsight[type].gradeId, type)
-        : 'N/A';
+        ? getGradeName(monthlyStats.hardestFlashOnsight[type].gradeId)
+        : '-';
       const hardestFlashOnsightCard = createStatCard(
         `Hardest ${type === 'Bouldering' ? 'Flash' : 'Onsight'}`,
         hardestFlashOnsightGrade
       );
       const hardestRouteTitle = type === 'Bouldering' ? 'Hardest Boulder' : 'Hardest Route';
       const hardestRouteGrade = monthlyStats[type].hardestRouteId
-        ? getGradeName(monthlyStats[type].hardestRouteId, type)
-        : 'N/A';
+        ? getGradeName(monthlyStats[type].hardestRouteId)
+        : '-';
       const hardestRouteCard = createStatCard(hardestRouteTitle, hardestRouteGrade);
       const averageGradeName = monthlyStats[type].averageGradeId
-        ? getGradeName(monthlyStats[type].averageGradeId, type)
-        : 'N/A';
+        ? getGradeName(monthlyStats[type].averageGradeId)
+        : '-';
       const averageGradeCard = createStatCard('Average Grade', averageGradeName);
 
       statsCards.appendChild(totalSessionsCard);
@@ -860,7 +873,10 @@ function calculateMonthlyStats(year, month) {
       stats[workout.type].averageGradeValue =
         stats[workout.type].totalGradeValue / stats[workout.type].totalGradeCount;
       const avgGradeValue = Math.round(stats[workout.type].averageGradeValue);
-      stats[workout.type].averageGradeId = avgGradeValue;
+      const avgGradeObj = grades.find(
+        g => g.gradeValue === avgGradeValue && g.type === workout.type && g.original.toLowerCase() === gradingSystem.toLowerCase()
+      );
+      stats[workout.type].averageGradeId = avgGradeObj ? avgGradeObj.id : null;
     }
   });
 
@@ -1017,8 +1033,8 @@ function exportDataToCSV() {
 
   workouts.forEach(workout => {
     workout.grades.forEach(grade => {
-      const gradeAmerican = grades.find(g => g.id === grade.gradeId && g.type === workout.type && g.original === 'american')?.american || 'N/A';
-      const gradeFrench = grades.find(g => g.id === grade.gradeId && g.type === workout.type && g.original === 'french')?.french || 'N/A';
+      const gradeAmerican = grades.find(g => g.id === grade.gradeId && g.type === workout.type && g.original === 'american')?.american || '-';
+      const gradeFrench = grades.find(g => g.id === grade.gradeId && g.type === workout.type && g.original === 'french')?.french || '-';
       const row = [
         workout.id,
         workout.date.toISOString(),
@@ -1041,4 +1057,80 @@ function exportDataToCSV() {
 
   link.click();
   document.body.removeChild(link);
+}
+
+// Import Data Function
+function importDataFromCSV() {
+  const fileInput = document.createElement('input');
+  fileInput.type = 'file';
+  fileInput.accept = '.csv';
+  fileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      readCSVFile(file);
+    }
+  });
+  fileInput.click();
+}
+
+function readCSVFile(file) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const text = e.target.result;
+    parseCSVData(text);
+  };
+  reader.readAsText(file);
+}
+
+function parseCSVData(csvData) {
+  const lines = csvData.split('\n');
+  const headers = lines[0].split(',');
+
+  const newWorkouts = {};
+
+  for (let i = 1; i < lines.length; i++) {
+    if (!lines[i]) continue;
+    const data = lines[i].split(',');
+
+    const workoutId = data[0];
+    const date = new Date(data[1]);
+    const type = data[2];
+    const gradeAmerican = data[3];
+    const gradeFrench = data[4];
+    const attempts = parseInt(data[5]) || 0;
+    const sends = parseInt(data[6]) || 0;
+    const flashesOnsights = parseInt(data[7]) || 0;
+
+    const gradeObj = grades.find(
+      g =>
+        ((g.american === gradeAmerican && g.original === 'american') ||
+          (g.french === gradeFrench && g.original === 'french')) &&
+        g.type === type
+    );
+
+    if (!gradeObj) continue;
+
+    if (!newWorkouts[workoutId]) {
+      newWorkouts[workoutId] = {
+        id: workoutId,
+        date: date,
+        type: type,
+        grades: []
+      };
+    }
+
+    newWorkouts[workoutId].grades.push({
+      gradeId: gradeObj.id,
+      attempts: attempts,
+      sends: sends,
+      flashesOnsights: flashesOnsights
+    });
+  }
+
+  // Merge with existing workouts
+  workouts = Object.values(newWorkouts);
+  saveWorkoutsToStorage();
+  renderCalendar();
+  updateStatistics();
+  alert('Data imported successfully!');
 }

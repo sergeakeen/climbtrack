@@ -3,14 +3,17 @@ import { grades } from './grades.js';
 // DEV toggle: set to 1 to show import/export menu, 0 to hide
 const DEV = 1; // Default is 1
 
-// Grading system preference
-let gradingSystem = 'American'; // Default to American
+// Change the default grading system to French
+let gradingSystem = 'French'; // Default to French
 
-// Load Grading System Preference
+// Update loadGradingSystemPreference function
 function loadGradingSystemPreference() {
   const storedPreference = localStorage.getItem('gradingSystem');
   if (storedPreference) {
     gradingSystem = storedPreference;
+  } else {
+    gradingSystem = 'French'; // Ensure default is French if no preference is stored
+    saveGradingSystemPreference();
   }
 }
 

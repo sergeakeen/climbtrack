@@ -26,14 +26,27 @@ function saveGradingSystemPreference() {
 
 // Get Grade Name
 function getGradeName(gradeValue, type) {
-  // Find any grade that matches the gradeValue and type
-  const grade = grades.find(
-    g => g.gradeValue === gradeValue && g.type === type
+  // Filter grades of the correct type and current grading system
+  const gradesOfType = grades.filter(
+    g => g.type === type && g.original.toLowerCase() === gradingSystem.toLowerCase()
   );
-  if (!grade) return '-';
+
+  if (gradesOfType.length === 0) return '-';
+
+  // Find the grade with the closest gradeValue
+  let closestGrade = gradesOfType[0];
+  let minDiff = Math.abs(gradeValue - closestGrade.gradeValue);
+
+  for (let grade of gradesOfType) {
+    let diff = Math.abs(gradeValue - grade.gradeValue);
+    if (diff < minDiff) {
+      minDiff = diff;
+      closestGrade = grade;
+    }
+  }
 
   // Return the grade name in the current grading system
-  return gradingSystem === 'American' ? grade.american : grade.french;
+  return gradingSystem === 'American' ? closestGrade.american : closestGrade.french;
 }
 
 // State Variables

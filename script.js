@@ -590,35 +590,52 @@ function saveWorkout() {
     }
   }
 
-  if (updatedGrades.length === 0) {
-    alert('Please add at least one attempt to save the session.');
-    return;
-  }
-
   if (editingWorkoutId) {
     // Find existing workout
     let existingWorkoutIndex = workouts.findIndex(w => w.id === editingWorkoutId);
     if (existingWorkoutIndex !== -1) {
       // Merge grades
       let existingWorkout = workouts[existingWorkoutIndex];
+
       // Remove grades in current grading system
       existingWorkout.grades = existingWorkout.grades.filter(
         grade => grade.originalGradingSystem !== gradingSystem
       );
+
       // Add updated grades
       existingWorkout.grades = existingWorkout.grades.concat(updatedGrades);
-      workouts[existingWorkoutIndex] = existingWorkout;
+
+      // Remove grades with zero attempts (already done above)
+      // existingWorkout.grades = existingWorkout.grades.filter(g => g.attempts > 0);
+
+      if (existingWorkout.grades.length === 0) {
+        // No grades left, cannot save an empty workout
+        alert('Cannot save a session with no attempts. Please add at least one attempt.');
+        return;
+      } else {
+        // Ensure existingWorkout.date is a Date object
+        if (!(existingWorkout.date instanceof Date)) {
+          existingWorkout.date = new Date(existingWorkout.date);
+        }
+        workouts[existingWorkoutIndex] = existingWorkout;
+      }
     }
     editingWorkoutId = null;
   } else {
     // For new workouts, set grades to updatedGrades
-    currentWorkout.grades = updatedGrades;
-    workouts.push(currentWorkout);
-  }
+    if (updatedGrades.length === 0) {
+      // No grades to save, do not add the workout
+      alert('Cannot save a session with no attempts. Please add at least one attempt.');
+      return;
+    } else {
+      currentWorkout.grades = updatedGrades;
 
-  // Ensure currentWorkout.date is a Date object
-  if (!(currentWorkout.date instanceof Date)) {
-    currentWorkout.date = new Date(currentWorkout.date);
+      // Ensure currentWorkout.date is a Date object
+      if (!(currentWorkout.date instanceof Date)) {
+        currentWorkout.date = new Date(currentWorkout.date);
+      }
+      workouts.push(currentWorkout);
+    }
   }
 
   saveWorkoutsToStorage();
@@ -627,6 +644,7 @@ function saveWorkout() {
   renderCalendar();
   updateStatistics();
 }
+
 
 // Show Workout Summary
 function showWorkoutSummary() {

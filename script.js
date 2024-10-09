@@ -25,15 +25,10 @@ function saveGradingSystemPreference() {
 }
 
 // Get Grade Name
-function getGradeName(gradeValue, type, targetGradingSystem) {
-  // If targetGradingSystem is not provided, default to current grading system
-  if (!targetGradingSystem) {
-    targetGradingSystem = gradingSystem;
-  }
-
-  // Filter grades of the correct type and target grading system
+function getGradeName(gradeValue, type) {
+  // Filter grades of the correct type and current grading system
   let gradesOfType = grades.filter(
-    g => g.type === type && g.original.toLowerCase() === targetGradingSystem.toLowerCase()
+    g => g.type === type && g.original.toLowerCase() === gradingSystem.toLowerCase()
   );
 
   if (gradesOfType.length === 0) return '-';
@@ -56,10 +51,34 @@ function getGradeName(gradeValue, type, targetGradingSystem) {
     targetGrade = gradesOfType[gradesOfType.length - 1];
   }
 
-  // Return the grade name in the target grading system
-  return targetGradingSystem === 'American' ? targetGrade.american : targetGrade.french;
+  // Return the grade name in the current grading system
+  return gradingSystem === 'American' ? targetGrade.american : targetGrade.french;
 }
 
+// Get Converted Grade Name
+function getConvertedGradeName(gradeValue, type, originalGradingSystem) {
+  const targetGradingSystem = gradingSystem;
+
+  // Find the grade object with the given gradeValue, type, and originalGradingSystem
+  let gradeObj = grades.find(
+    g =>
+      g.gradeValue === gradeValue &&
+      g.type === type &&
+      g.original.toLowerCase() === originalGradingSystem.toLowerCase()
+  );
+
+  if (!gradeObj) {
+    // If not found, find any grade with the same gradeValue and type
+    gradeObj = grades.find(
+      g => g.gradeValue === gradeValue && g.type === type
+    );
+  }
+
+  if (!gradeObj) return '-';
+
+  // Return the grade name in the target grading system
+  return targetGradingSystem === 'American' ? gradeObj.american : gradeObj.french;
+}
 
 // State Variables
 let selectedDate = new Date();
@@ -590,8 +609,8 @@ function openGradeSelectionModal() {
     }
   });
 
- // Store updated grades in a temporary property
- currentWorkout.updatedGrades = updatedGrades;
+  // Store updated grades in a temporary property
+  currentWorkout.updatedGrades = updatedGrades;
 
   openModal('grade-selection-modal');
 }
@@ -630,13 +649,9 @@ function saveWorkout() {
       // Add updated grades
       existingWorkout.grades = existingWorkout.grades.concat(updatedGrades);
 
-      // Remove grades with zero attempts (already done above)
-      // existingWorkout.grades = existingWorkout.grades.filter(g => g.attempts > 0);
-
       if (existingWorkout.grades.length === 0) {
         // No grades left, cannot save an empty workout
-        alert('Cannot save a session with no attempts. Please add at least one attempt.');
-        return;
+        workouts.splice(existingWorkoutIndex, 1); // Remove the workout entirely
       } else {
         // Ensure existingWorkout.date is a Date object
         if (!(existingWorkout.date instanceof Date)) {
@@ -669,7 +684,6 @@ function saveWorkout() {
   renderCalendar();
   updateStatistics();
 }
-
 
 // Show Workout Summary
 function showWorkoutSummary() {
@@ -716,7 +730,7 @@ function showWorkoutSummary() {
 
     workout.grades.forEach(grade => {
       const gradeText = document.createElement('p');
-      let gradeName = getGradeName(grade.gradeValue, grade.type);
+      let gradeName = getConvertedGradeName(grade.gradeValue, grade.type, grade.originalGradingSystem);
       let text = `${gradeName}: Attempts ${grade.attempts}, Sends ${grade.sends}`;
       if (grade.flashesOnsights) {
         text += `, ${workout.type === 'Bouldering' ? 'Flashes' : 'Onsights'} ${grade.flashesOnsights}`;
@@ -901,7 +915,8 @@ function calculateMonthlyStats(year, month) {
         stats[workout.type].gradeCounts[gradeId] = {
           attempts: 0,
           sends: 0,
-          flashesOnsights: 0
+          flashesOnsights: 0,
+          originalGradingSystem: grade.originalGradingSystem
         };
       }
       const gradeCountObj = stats[workout.type].gradeCounts[gradeId];
@@ -909,6 +924,7 @@ function calculateMonthlyStats(year, month) {
       gradeCountObj.attempts += grade.attempts;
       gradeCountObj.sends += grade.sends;
       gradeCountObj.flashesOnsights += grade.flashesOnsights;
+      gradeCountObj.originalGradingSystem = grade.originalGradingSystem;
 
       stats[workout.type].totalAttempts += grade.attempts;
       stats[workout.type].totalSends += grade.sends;
@@ -944,7 +960,8 @@ function calculateMonthlyStats(year, month) {
 // Function to render the grade distribution chart
 function renderGradeDistributionChart(type) {
   const chartId = type === 'Bouldering' ? 'bouldering-grade-chart' : 'sport-climbing-grade-chart';
-  const gradeCounts = calculateMonthlyStats(currentMonth.getFullYear(), currentMonth.getMonth())[type].gradeCounts;
+  const monthlyStats = calculateMonthlyStats(currentMonth.getFullYear(), currentMonth.getMonth());
+  const gradeCounts = monthlyStats[type].gradeCounts;
 
   // Get the canvas element
   const canvas = document.getElementById(chartId);
@@ -960,15 +977,8 @@ function renderGradeDistributionChart(type) {
     return;
   }
 
-  const labels = gradeIds.map(id => {
-    const gradeObj = grades.find(g => g.id === id);
-    return getGradeName(gradeObj.gradeValue, gradeObj.type);
-  });
-
-  const attemptsData = [];
-  const sendsData = [];
-  const flashesOnsightsData = [];
-  const totalAttemptsPerGrade = [];
+  // Create a map to aggregate data by converted grade name
+  const gradeDataMap = {};
 
   gradeIds.forEach((gradeId) => {
     const counts = gradeCounts[gradeId];
@@ -978,20 +988,54 @@ function renderGradeDistributionChart(type) {
     const failedAttempts = Math.max(0, attempts - sends);
     const sendsWithoutFlashes = Math.max(0, sends - flashesOnsights);
 
-    attemptsData.push(failedAttempts);
-    sendsData.push(sendsWithoutFlashes);
-    flashesOnsightsData.push(flashesOnsights);
-    totalAttemptsPerGrade.push(attempts);
+    // Get the grade object
+    const gradeObj = grades.find(g => g.id === gradeId);
+    if (!gradeObj) return;
+
+    // Get the converted grade name in the current grading system
+    const gradeName = getConvertedGradeName(gradeObj.gradeValue, gradeObj.type, counts.originalGradingSystem);
+
+    // Use gradeName as the key
+    if (!gradeDataMap[gradeName]) {
+      gradeDataMap[gradeName] = {
+        attempts: 0,
+        failedAttempts: 0,
+        sends: 0,
+        flashesOnsights: 0,
+        totalAttempts: 0,
+        gradeValue: gradeObj.gradeValue // For sorting purposes
+      };
+    }
+
+    gradeDataMap[gradeName].attempts += attempts;
+    gradeDataMap[gradeName].failedAttempts += failedAttempts;
+    gradeDataMap[gradeName].sends += sendsWithoutFlashes;
+    gradeDataMap[gradeName].flashesOnsights += flashesOnsights;
+    gradeDataMap[gradeName].totalAttempts += attempts;
+  });
+
+  // Prepare data arrays for the chart
+  const labels = Object.keys(gradeDataMap).sort((a, b) => {
+    return gradeDataMap[a].gradeValue - gradeDataMap[b].gradeValue;
+  });
+
+  const failedAttemptsData = [];
+  const sendsData = [];
+  const flashesOnsightsData = [];
+  const totalAttemptsPerGrade = [];
+
+  labels.forEach((label) => {
+    const data = gradeDataMap[label];
+    failedAttemptsData.push(data.failedAttempts);
+    sendsData.push(data.sends);
+    flashesOnsightsData.push(data.flashesOnsights);
+    totalAttemptsPerGrade.push(data.totalAttempts);
   });
 
   // Destroy existing chart instance if any
   if (canvas.chart) {
     canvas.chart.destroy();
   }
-
-  // Calculate the maximum total attempts for Y-axis scaling
-  const maxTotalAttempts = Math.max(...totalAttemptsPerGrade);
-  const maxYValue = maxTotalAttempts;
 
   // Create stacked bar chart
   canvas.chart = new Chart(ctx, {
@@ -1001,7 +1045,7 @@ function renderGradeDistributionChart(type) {
       datasets: [
         {
           label: 'Failed Attempts',
-          data: attemptsData,
+          data: failedAttemptsData,
           backgroundColor: '#f56565', // Red
         },
         {
@@ -1034,7 +1078,7 @@ function renderGradeDistributionChart(type) {
           stacked: true,
           ticks: {
             display: false,
-            max: maxYValue + 2 // Add extra space above the tallest bar
+            max: Math.max(...totalAttemptsPerGrade) + 2 // Add extra space above the tallest bar
           },
           grid: {
             display: false,

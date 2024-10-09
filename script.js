@@ -25,29 +25,41 @@ function saveGradingSystemPreference() {
 }
 
 // Get Grade Name
-function getGradeName(gradeValue, type) {
-  // Filter grades of the correct type and current grading system
-  const gradesOfType = grades.filter(
-    g => g.type === type && g.original.toLowerCase() === gradingSystem.toLowerCase()
+function getGradeName(gradeValue, type, targetGradingSystem) {
+  // If targetGradingSystem is not provided, default to current grading system
+  if (!targetGradingSystem) {
+    targetGradingSystem = gradingSystem;
+  }
+
+  // Filter grades of the correct type and target grading system
+  let gradesOfType = grades.filter(
+    g => g.type === type && g.original.toLowerCase() === targetGradingSystem.toLowerCase()
   );
 
   if (gradesOfType.length === 0) return '-';
 
-  // Find the grade with the closest gradeValue
-  let closestGrade = gradesOfType[0];
-  let minDiff = Math.abs(gradeValue - closestGrade.gradeValue);
+  // Sort the grades by gradeValue
+  gradesOfType.sort((a, b) => a.gradeValue - b.gradeValue);
+
+  // Find the grade with the same or next higher gradeValue
+  let targetGrade = null;
 
   for (let grade of gradesOfType) {
-    let diff = Math.abs(gradeValue - grade.gradeValue);
-    if (diff < minDiff) {
-      minDiff = diff;
-      closestGrade = grade;
+    if (grade.gradeValue >= gradeValue) {
+      targetGrade = grade;
+      break;
     }
   }
 
-  // Return the grade name in the current grading system
-  return gradingSystem === 'American' ? closestGrade.american : closestGrade.french;
+  // If no grade found (i.e., gradeValue is higher than any available), use the highest grade
+  if (!targetGrade) {
+    targetGrade = gradesOfType[gradesOfType.length - 1];
+  }
+
+  // Return the grade name in the target grading system
+  return targetGradingSystem === 'American' ? targetGrade.american : targetGrade.french;
 }
+
 
 // State Variables
 let selectedDate = new Date();

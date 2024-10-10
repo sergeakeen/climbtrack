@@ -25,48 +25,26 @@ function saveGradingSystemPreference() {
 }
 
 // Get Grade Name
-function getGradeName(gradeValue, type) {
-  // Filter grades of the correct type and current grading system
-  let gradesOfType = grades.filter(
-    g => g.type === type && g.original.toLowerCase() === gradingSystem.toLowerCase()
+function getGradeName(gradeId, type) {
+  // Find the grade object by id and type
+  let gradeObj = grades.find(
+    g => g.id === gradeId && g.type === type
   );
 
-  if (gradesOfType.length === 0) return '-';
-
-  // Sort the grades by gradeValue
-  gradesOfType.sort((a, b) => a.gradeValue - b.gradeValue);
-
-  // Find the grade with the closest gradeValue
-  let closestGrade = gradesOfType[0];
-  let minDiff = Math.abs(gradeValue - closestGrade.gradeValue);
-
-  for (let grade of gradesOfType) {
-    let diff = Math.abs(gradeValue - grade.gradeValue);
-    if (diff < minDiff) {
-      minDiff = diff;
-      closestGrade = grade;
-    }
-  }
+  if (!gradeObj) return '-';
 
   // Return the grade name in the current grading system
-  return gradingSystem === 'American' ? closestGrade.american : closestGrade.french;
+  return gradingSystem === 'American' ? gradeObj.american : gradeObj.french;
 }
 
 // Get Converted Grade Name
-function getConvertedGradeName(gradeValue, type, originalGradingSystem) {
+function getConvertedGradeName(gradeId, type, originalGradingSystem) {
   const targetGradingSystem = gradingSystem;
 
-  // Find the grade object with the given gradeValue, type, and originalGradingSystem
+  // Find the grade object by id, type, and originalGradingSystem
   let gradeObj = grades.find(
-    g => g.gradeValue === gradeValue && g.type === type && g.original.toLowerCase() === originalGradingSystem.toLowerCase()
+    g => g.id === gradeId && g.type === type && g.original.toLowerCase() === originalGradingSystem.toLowerCase()
   );
-
-  if (!gradeObj) {
-    // If not found, find any grade with the same gradeValue and type
-    gradeObj = grades.find(
-      g => g.gradeValue === gradeValue && g.type === type
-    );
-  }
 
   if (!gradeObj) return '-';
 
@@ -109,10 +87,10 @@ document.addEventListener('DOMContentLoaded', () => {
 function migrateWorkoutData() {
   workouts.forEach(workout => {
     workout.grades.forEach(gradeEntry => {
-      if (gradeEntry.gradeId && !gradeEntry.gradeValue) {
+      if (gradeEntry.gradeId && !gradeEntry.type) {
         const gradeObj = grades.find(g => g.id === gradeEntry.gradeId);
         if (gradeObj) {
-          gradeEntry.gradeValue = gradeObj.gradeValue;
+          // Assign missing properties if necessary
           gradeEntry.type = gradeObj.type;
           gradeEntry.originalGradingSystem = gradeObj.original;
         }
@@ -421,11 +399,11 @@ function openGradeSelectionModal() {
     g => g.type === selectedWorkoutType && g.original.toLowerCase() === gradingSystem.toLowerCase()
   );
 
-  // Map existing grades by gradeValue for quick lookup
+  // Map existing grades by gradeId for quick lookup
   const existingGradesMap = {};
   currentWorkout.grades.forEach(grade => {
     if (grade.originalGradingSystem === gradingSystem) {
-      existingGradesMap[grade.gradeValue] = grade;
+      existingGradesMap[grade.gradeId] = grade;
     }
   });
 
@@ -434,9 +412,8 @@ function openGradeSelectionModal() {
 
   gradeOptions.forEach((gradeObj) => {
     // Use existing grade data if available
-    let gradeData = existingGradesMap[gradeObj.gradeValue] || {
+    let gradeData = existingGradesMap[gradeObj.id] || {
       gradeId: gradeObj.id,
-      gradeValue: gradeObj.gradeValue,
       type: gradeObj.type,
       originalGradingSystem: gradingSystem,
       attempts: 0,
@@ -459,7 +436,7 @@ function openGradeSelectionModal() {
     const gradeHeader = document.createElement('div');
     gradeHeader.classList.add('grade-header');
     gradeHeader.innerHTML = `
-      <span class="grade-title">${getGradeName(gradeObj.gradeValue, gradeObj.type)}</span>
+      <span class="grade-title">${getGradeName(gradeObj.id, gradeObj.type)}</span>
       <i class="fas fa-chevron-down toggle-icon"></i>
     `;
     gradeItem.appendChild(gradeHeader);
@@ -617,12 +594,12 @@ function saveWorkout() {
   // Validate all grades
   for (let grade of updatedGrades) {
     if (grade.sends > grade.attempts) {
-      const gradeName = getGradeName(grade.gradeValue, grade.type);
+      const gradeName = getGradeName(grade.gradeId, grade.type);
       alert(`For grade ${gradeName}, sends cannot exceed attempts.`);
       return;
     }
     if (grade.flashesOnsights > grade.sends) {
-      const gradeName = getGradeName(grade.gradeValue, grade.type);
+      const gradeName = getGradeName(grade.gradeId, grade.type);
       alert(`For grade ${gradeName}, flashes/onsights cannot exceed sends.`);
       return;
     }
@@ -642,9 +619,6 @@ function saveWorkout() {
 
       // Add updated grades
       existingWorkout.grades = existingWorkout.grades.concat(updatedGrades);
-
-      // Remove grades with zero attempts (already done above)
-      // existingWorkout.grades = existingWorkout.grades.filter(g => g.attempts > 0);
 
       if (existingWorkout.grades.length === 0) {
         // No grades left, cannot save an empty workout
@@ -728,7 +702,7 @@ function showWorkoutSummary() {
 
     workout.grades.forEach(grade => {
       const gradeText = document.createElement('p');
-      let gradeName = getConvertedGradeName(grade.gradeValue, grade.type, grade.originalGradingSystem);
+      let gradeName = getConvertedGradeName(grade.gradeId, grade.type, grade.originalGradingSystem);
       let text = `${gradeName}: Attempts ${grade.attempts}, Sends ${grade.sends}`;
       if (grade.flashesOnsights) {
         text += `, ${workout.type === 'Bouldering' ? 'Flashes' : 'Onsights'} ${grade.flashesOnsights}`;
@@ -824,45 +798,38 @@ function updateStatistics() {
         `Flash ratio: ${flashRatio}`
       );
 
-      // Hardest Flash/Onsight Progression
-      // Hardest Flash/Onsight Progression
-  const hardestFlashOnsightGrade = monthlyStats.hardestFlashOnsight[type]
-  ? getGradeName(monthlyStats.hardestFlashOnsight[type].gradeValue, type)
-  : '-';
+      const hardestFlashOnsightGrade = monthlyStats.hardestFlashOnsight[type]
+        ? getConvertedGradeName(
+            monthlyStats.hardestFlashOnsight[type].gradeId,
+            type,
+            monthlyStats.hardestFlashOnsight[type].originalGradingSystem
+          )
+        : '-';
 
-const flashOnsightProgression = progressionStats[type].flashOnsightProgression.length > 1
-  ? `Progression: ${progressionStats[type].flashOnsightProgression.join(' → ')}`
-  : '';
+      const flashOnsightProgression = progressionStats[type].flashOnsightProgression.length > 1
+        ? `Progression: ${progressionStats[type].flashOnsightProgression.join(' → ')}`
+        : '';
 
-const hardestFlashOnsightCard = createStatCard(
-  `Hardest ${type === 'Bouldering' ? 'Flash' : 'Onsight'}`,
-  hardestFlashOnsightGrade,
-  flashOnsightProgression
-);
+      const hardestFlashOnsightCard = createStatCard(
+        `Hardest ${type === 'Bouldering' ? 'Flash' : 'Onsight'}`,
+        hardestFlashOnsightGrade,
+        flashOnsightProgression
+      );
 
-// Hardest Route Progression
-const hardestRouteTitle = type === 'Bouldering' ? 'Hardest Boulder' : 'Hardest Route';
-const hardestRouteGrade = monthlyStats[type].hardestRouteValue !== null
-  ? getGradeName(monthlyStats[type].hardestRouteValue, type)
-  : '-';
+      const hardestRouteTitle = type === 'Bouldering' ? 'Hardest Boulder' : 'Hardest Route';
+      const hardestRouteGrade = monthlyStats[type].hardestGradeId !== null
+        ? getConvertedGradeName(
+            monthlyStats[type].hardestGradeId,
+            type,
+            monthlyStats[type].hardestGradeOriginal
+          )
+        : '-';
 
-const routeProgression = progressionStats[type].hardestGradeProgression.length > 1
-  ? `Progression: ${progressionStats[type].hardestGradeProgression.join(' → ')}`
-  : '';
+      const routeProgression = progressionStats[type].hardestGradeProgression.length > 1
+        ? `Progression: ${progressionStats[type].hardestGradeProgression.join(' → ')}`
+        : '';
 
-const hardestRouteCard = createStatCard(hardestRouteTitle, hardestRouteGrade, routeProgression);
-
-
-      const averageGradeName = monthlyStats[type].averageGradeValue
-  ? getGradeName(monthlyStats[type].averageGradeValue, type)
-  : '-';
-
-// Average Grade Progression
-const averageGradeProgression = progressionStats[type].averageGradeProgression.length > 1
-  ? `Progression: ${progressionStats[type].averageGradeProgression.join(' → ')}`
-  : '';
-
-const averageGradeCard = createStatCard('Average Grade', averageGradeName, averageGradeProgression);
+      const hardestRouteCard = createStatCard(hardestRouteTitle, hardestRouteGrade, routeProgression);
 
       statsCards.appendChild(totalSessionsCard);
       statsCards.appendChild(totalAttemptsCard);
@@ -870,7 +837,6 @@ const averageGradeCard = createStatCard('Average Grade', averageGradeName, avera
       statsCards.appendChild(totalFlashesOnsightsCard);
       statsCards.appendChild(hardestFlashOnsightCard);
       statsCards.appendChild(hardestRouteCard);
-      statsCards.appendChild(averageGradeCard);
 
       statsEl.appendChild(statsCards);
 
@@ -923,10 +889,9 @@ function calculateMonthlyStats(year, month) {
       totalAttempts: 0,
       totalSends: 0,
       totalFlashesOnsights: 0,
-      hardestRouteValue: null, // Changed from 0 to null
-      totalGradeValue: 0,
-      totalGradeCount: 0,
-      averageGradeValue: null // Changed from 0 to null
+      hardestGradeValue: null,
+      hardestGradeId: null,
+      hardestGradeOriginal: null
     },
     'Sport Climbing': {
       gradeCounts: {},
@@ -934,10 +899,9 @@ function calculateMonthlyStats(year, month) {
       totalAttempts: 0,
       totalSends: 0,
       totalFlashesOnsights: 0,
-      hardestRouteValue: null, // Changed from 0 to null
-      totalGradeValue: 0,
-      totalGradeCount: 0,
-      averageGradeValue: null // Changed from 0 to null
+      hardestGradeValue: null,
+      hardestGradeId: null,
+      hardestGradeOriginal: null
     },
     hardestFlashOnsight: { Bouldering: null, 'Sport Climbing': null }
   };
@@ -951,19 +915,32 @@ function calculateMonthlyStats(year, month) {
     stats[workout.type].totalSessions += 1;
 
     workout.grades.forEach(grade => {
-      const gradeObj = grades.find(g => g.gradeValue === grade.gradeValue && g.type === workout.type);
+      const gradeId = grade.gradeId;
+      const type = grade.type;
+      const originalGradingSystem = grade.originalGradingSystem;
+
+      // Get the grade object
+      const gradeObj = grades.find(
+        g => g.id === gradeId && g.type === type && g.original.toLowerCase() === originalGradingSystem.toLowerCase()
+      );
+
       if (!gradeObj) return;
 
-      const gradeId = gradeObj.id;
+      const gradeValue = gradeObj.gradeValue;
 
-      if (!stats[workout.type].gradeCounts[gradeId]) {
-        stats[workout.type].gradeCounts[gradeId] = {
+      // Get the grade name in the current grading system
+      const gradeName = getConvertedGradeName(gradeId, type, originalGradingSystem);
+
+      if (!stats[workout.type].gradeCounts[gradeName]) {
+        stats[workout.type].gradeCounts[gradeName] = {
           attempts: 0,
           sends: 0,
-          flashesOnsights: 0
+          flashesOnsights: 0,
+          gradeValue: gradeValue // Store gradeValue for sorting
         };
       }
-      const gradeCountObj = stats[workout.type].gradeCounts[gradeId];
+
+      const gradeCountObj = stats[workout.type].gradeCounts[gradeName];
 
       gradeCountObj.attempts += grade.attempts;
       gradeCountObj.sends += grade.sends;
@@ -973,35 +950,26 @@ function calculateMonthlyStats(year, month) {
       stats[workout.type].totalSends += grade.sends;
       stats[workout.type].totalFlashesOnsights += grade.flashesOnsights;
 
-      const gradeValue = grade.gradeValue;
-
-      // Update hardest route
-      if (grade.sends > 0 && (stats[workout.type].hardestRouteValue === null || gradeValue > stats[workout.type].hardestRouteValue)) {
-        stats[workout.type].hardestRouteValue = gradeValue;
+      // Update hardest route based on gradeValue
+      if (grade.sends > 0 && (stats[workout.type].hardestGradeValue === null || gradeValue > stats[workout.type].hardestGradeValue)) {
+        stats[workout.type].hardestGradeValue = gradeValue;
+        stats[workout.type].hardestGradeId = gradeId; // Keep track of gradeId
+        stats[workout.type].hardestGradeOriginal = originalGradingSystem;
       }
 
       // Update hardest Flash/Onsight
       if (grade.flashesOnsights > 0 && (stats.hardestFlashOnsight[workout.type]?.gradeValue === undefined || gradeValue > stats.hardestFlashOnsight[workout.type].gradeValue)) {
-        stats.hardestFlashOnsight[workout.type] = { gradeValue };
+        stats.hardestFlashOnsight[workout.type] = {
+          gradeValue: gradeValue,
+          gradeId: gradeId,
+          originalGradingSystem: originalGradingSystem
+        };
       }
-
-      // For average grade calculation
-      stats[workout.type].totalGradeValue += gradeValue * grade.sends;
-      stats[workout.type].totalGradeCount += grade.sends;
     });
-
-    // Calculate average grade
-    if (stats[workout.type].totalGradeCount > 0) {
-      stats[workout.type].averageGradeValue =
-        stats[workout.type].totalGradeValue / stats[workout.type].totalGradeCount;
-    } else {
-      stats[workout.type].averageGradeValue = null; // Ensure it's null if no grades
-    }
   });
 
   return stats;
 }
-
 
 // Calculate Progression Stats
 function calculateProgressionStats() {
@@ -1009,12 +977,10 @@ function calculateProgressionStats() {
     Bouldering: {
       hardestGradeProgression: [],
       flashOnsightProgression: [],
-      averageGradeProgression: []
     },
     'Sport Climbing': {
       hardestGradeProgression: [],
       flashOnsightProgression: [],
-      averageGradeProgression: []
     }
   };
 
@@ -1027,21 +993,15 @@ function calculateProgressionStats() {
 
     ['Bouldering', 'Sport Climbing'].forEach(type => {
       // Hardest Grade
-      if (stats[type].hardestRouteValue !== null) {
-        const gradeName = getGradeName(stats[type].hardestRouteValue, type);
+      if (stats[type].hardestGradeId !== null) {
+        const gradeName = getConvertedGradeName(stats[type].hardestGradeId, type, stats[type].hardestGradeOriginal);
         progressionStats[type].hardestGradeProgression.push(gradeName);
       }
 
       // Hardest Flash/Onsight
-      if (stats.hardestFlashOnsight[type]?.gradeValue !== undefined) {
-        const gradeName = getGradeName(stats.hardestFlashOnsight[type].gradeValue, type);
+      if (stats.hardestFlashOnsight[type]?.gradeId !== undefined) {
+        const gradeName = getConvertedGradeName(stats.hardestFlashOnsight[type].gradeId, type, stats.hardestFlashOnsight[type].originalGradingSystem);
         progressionStats[type].flashOnsightProgression.push(gradeName);
-      }
-
-      // Average Grade
-      if (stats[type].averageGradeValue !== null) {
-        const averageGradeName = getGradeName(stats[type].averageGradeValue, type);
-        progressionStats[type].averageGradeProgression.push(averageGradeName);
       }
     });
   });
@@ -1050,92 +1010,56 @@ function calculateProgressionStats() {
   ['Bouldering', 'Sport Climbing'].forEach(type => {
     progressionStats[type].hardestGradeProgression.reverse();
     progressionStats[type].flashOnsightProgression.reverse();
-    progressionStats[type].averageGradeProgression.reverse();
 
     // Limit progression to last 3 grades if more than 3 months have data
     progressionStats[type].hardestGradeProgression = progressionStats[type].hardestGradeProgression.slice(-3);
     progressionStats[type].flashOnsightProgression = progressionStats[type].flashOnsightProgression.slice(-3);
-    progressionStats[type].averageGradeProgression = progressionStats[type].averageGradeProgression.slice(-3);
   });
 
   return progressionStats;
 }
 
-
-
-
 // Function to render the grade distribution chart
 function renderGradeDistributionChart(type) {
   const chartId = type === 'Bouldering' ? 'bouldering-grade-chart' : 'sport-climbing-grade-chart';
-  const gradeCounts = calculateMonthlyStats(currentMonth.getFullYear(), currentMonth.getMonth())[type].gradeCounts;
+  const monthlyStats = calculateMonthlyStats(currentMonth.getFullYear(), currentMonth.getMonth());
+  const gradeCounts = monthlyStats[type].gradeCounts;
 
   // Get the canvas element
   const canvas = document.getElementById(chartId);
   const ctx = canvas.getContext('2d');
 
   // Prepare data
-  const gradeIds = Object.keys(gradeCounts)
-    .map(id => parseInt(id))
-    .sort((a, b) => a - b);
+  const gradeNames = Object.keys(gradeCounts);
 
-  if (gradeIds.length === 0) {
+  if (gradeNames.length === 0) {
     // No data to display
     return;
   }
 
-  // Create a map to aggregate data by converted grade name
-  const gradeDataMap = {};
+  // Prepare data arrays for the chart
+  const failedAttemptsData = [];
+  const sendsData = [];
+  const flashesOnsightsData = [];
+  const totalAttemptsPerGrade = [];
 
-  gradeIds.forEach((gradeId) => {
-    const counts = gradeCounts[gradeId];
+  // Sort grade names based on gradeValue
+  gradeNames.sort((a, b) => {
+    return gradeCounts[a].gradeValue - gradeCounts[b].gradeValue;
+  });
+
+  gradeNames.forEach((gradeName) => {
+    const counts = gradeCounts[gradeName];
     const attempts = counts.attempts;
     const sends = counts.sends;
     const flashesOnsights = counts.flashesOnsights;
     const failedAttempts = Math.max(0, attempts - sends);
     const sendsWithoutFlashes = Math.max(0, sends - flashesOnsights);
 
-    // Get the grade object
-    const gradeObj = grades.find(g => g.id === gradeId);
-    if (!gradeObj) return;
-
-    // Get the converted grade name in the current grading system
-    const gradeName = getConvertedGradeName(gradeObj.gradeValue, gradeObj.type, gradeObj.original);
-
-    // Use gradeName as the key
-    if (!gradeDataMap[gradeName]) {
-      gradeDataMap[gradeName] = {
-        attempts: 0,
-        failedAttempts: 0,
-        sends: 0,
-        flashesOnsights: 0,
-        totalAttempts: 0,
-        gradeValue: gradeObj.gradeValue // For sorting purposes
-      };
-    }
-
-    gradeDataMap[gradeName].attempts += attempts;
-    gradeDataMap[gradeName].failedAttempts += failedAttempts;
-    gradeDataMap[gradeName].sends += sendsWithoutFlashes;
-    gradeDataMap[gradeName].flashesOnsights += flashesOnsights;
-    gradeDataMap[gradeName].totalAttempts += attempts;
-  });
-
-  // Prepare data arrays for the chart
-  const labels = Object.keys(gradeDataMap).sort((a, b) => {
-    return gradeDataMap[a].gradeValue - gradeDataMap[b].gradeValue;
-  });
-
-  const failedAttemptsData = [];
-  const sendsData = [];
-  const flashesOnsightsData = [];
-  const totalAttemptsPerGrade = [];
-
-  labels.forEach((label) => {
-    const data = gradeDataMap[label];
-    failedAttemptsData.push(data.failedAttempts);
-    sendsData.push(data.sends);
-    flashesOnsightsData.push(data.flashesOnsights);
-    totalAttemptsPerGrade.push(data.totalAttempts);
+    failedAttemptsData.push(failedAttempts);
+    sendsData.push(sendsWithoutFlashes);
+    flashesOnsightsData.push(flashesOnsights);
+    totalAttemptsPerGrade.push(attempts);
   });
 
   // Destroy existing chart instance if any
@@ -1147,7 +1071,7 @@ function renderGradeDistributionChart(type) {
   canvas.chart = new Chart(ctx, {
     type: 'bar',
     data: {
-      labels: labels,
+      labels: gradeNames,
       datasets: [
         {
           label: 'Failed Attempts',
@@ -1246,12 +1170,9 @@ function exportDataToCSV() {
     workout.grades.forEach(grade => {
       // Only include grades with attempts > 0
       if (grade.attempts > 0) {
-        const gradeAmerican = grades.find(
-          g => g.gradeValue === grade.gradeValue && g.type === workout.type && g.original === 'american'
-        )?.american || '-';
-        const gradeFrench = grades.find(
-          g => g.gradeValue === grade.gradeValue && g.type === workout.type && g.original === 'french'
-        )?.french || '-';
+        const gradeObj = grades.find(g => g.id === grade.gradeId);
+        const gradeAmerican = gradeObj?.american || '-';
+        const gradeFrench = gradeObj?.french || '-';
         const row = [
           workout.id,
           workout.date.toISOString(),
@@ -1339,7 +1260,6 @@ function parseCSVData(csvData) {
 
     newWorkouts[workoutId].grades.push({
       gradeId: gradeObj.id,
-      gradeValue: gradeObj.gradeValue,
       type: gradeObj.type,
       originalGradingSystem: gradeObj.original,
       attempts: attempts,

@@ -1161,6 +1161,7 @@ function loadWorkoutsFromStorage() {
   }
 }
 
+
 // Export Data Function
 function exportDataToCSV() {
   let csvContent = "data:text/csv;charset=utf-8,";
@@ -1170,9 +1171,22 @@ function exportDataToCSV() {
     workout.grades.forEach(grade => {
       // Only include grades with attempts > 0
       if (grade.attempts > 0) {
-        const gradeObj = grades.find(g => g.id === grade.gradeId);
-        const gradeAmerican = gradeObj?.american || '-';
-        const gradeFrench = gradeObj?.french || '-';
+        const gradeObj = grades.find(
+          g => g.id === grade.gradeId && g.original.toLowerCase() === grade.originalGradingSystem.toLowerCase()
+        );
+
+        if (!gradeObj) return; // Skip if gradeObj not found
+
+        let gradeAmerican = '';
+        let gradeFrench = '';
+
+        // Set the grade in the original grading system
+        if (grade.originalGradingSystem.toLowerCase() === 'american') {
+          gradeAmerican = gradeObj.american;
+        } else {
+          gradeFrench = gradeObj.french;
+        }
+
         const row = [
           workout.id,
           workout.date.toISOString(),
@@ -1234,20 +1248,31 @@ function parseCSVData(csvData) {
     const workoutId = data[0];
     const date = new Date(data[1]);
     const type = data[2];
-    const gradeAmerican = data[3];
-    const gradeFrench = data[4];
+    const gradeAmerican = data[3].trim();
+    const gradeFrench = data[4].trim();
     const attempts = parseInt(data[5]) || 0;
     const sends = parseInt(data[6]) || 0;
     const flashesOnsights = parseInt(data[7]) || 0;
 
-    const gradeObj = grades.find(
-      g =>
-        ((g.american === gradeAmerican && g.original === 'american') ||
-          (g.french === gradeFrench && g.original === 'french')) &&
-        g.type === type
-    );
+    let originalGradingSystem = '';
+    let gradeObj = null;
 
-    if (!gradeObj) continue;
+    if (gradeAmerican && !gradeFrench) {
+      originalGradingSystem = 'american';
+      gradeObj = grades.find(
+        g => g.american === gradeAmerican && g.original.toLowerCase() === originalGradingSystem && g.type === type
+      );
+    } else if (gradeFrench && !gradeAmerican) {
+      originalGradingSystem = 'french';
+      gradeObj = grades.find(
+        g => g.french === gradeFrench && g.original.toLowerCase() === originalGradingSystem && g.type === type
+      );
+    } else {
+      // Skip if both or neither grades are provided
+      continue;
+    }
+
+    if (!gradeObj) continue; // Skip if grade not found
 
     if (!newWorkouts[workoutId]) {
       newWorkouts[workoutId] = {
@@ -1261,15 +1286,30 @@ function parseCSVData(csvData) {
     newWorkouts[workoutId].grades.push({
       gradeId: gradeObj.id,
       type: gradeObj.type,
-      originalGradingSystem: gradeObj.original,
+      originalGradingSystem: originalGradingSystem,
       attempts: attempts,
       sends: sends,
       flashesOnsights: flashesOnsights
     });
   }
 
-  // Merge with existing workouts
-  workouts = Object.values(newWorkouts);
+  // Merge imported workouts with existing workouts
+  const importedWorkouts = Object.values(newWorkouts);
+
+  // Optional: You can choose to replace existing workouts or merge them
+  // For this example, we'll merge workouts with the same ID
+  importedWorkouts.forEach(importedWorkout => {
+    const existingWorkoutIndex = workouts.findIndex(w => w.id === importedWorkout.id);
+    if (existingWorkoutIndex !== -1) {
+      // Merge grades
+      const existingWorkout = workouts[existingWorkoutIndex];
+      existingWorkout.grades = existingWorkout.grades.concat(importedWorkout.grades);
+      workouts[existingWorkoutIndex] = existingWorkout;
+    } else {
+      workouts.push(importedWorkout);
+    }
+  });
+
   saveWorkoutsToStorage();
   renderCalendar();
   updateStatistics();

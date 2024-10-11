@@ -784,18 +784,18 @@ function updateStatistics() {
       const totalSends = monthlyStats[type].totalSends;
       const totalFlashesOnsights = monthlyStats[type].totalFlashesOnsights;
 
-      const completionRate = ((totalSends / totalAttempts) * 100).toFixed(1) + '%';
-      const flashRatio = totalSends > 0 ? ((totalFlashesOnsights / totalSends) * 100).toFixed(1) + '%' : '0%';
-      const sendsPerSession = (totalSends / totalSessions).toFixed(2);
-      const attemptsPerSession = (totalAttempts / totalSessions).toFixed(2);
+      const completionRate = ((totalSends / totalAttempts) * 100).toFixed(0) + '%';
+      const flashRatio = totalSends > 0 ? ((totalFlashesOnsights / totalSends) * 100).toFixed(0) + '%' : '0%';
+      const sendsPerSession = (totalSends / totalSessions).toFixed(0);
+      const attemptsPerSession = (totalAttempts / totalSessions).toFixed(0);
 
-      const totalSessionsCard = createStatCard('Sessions', totalSessions, `Sends per session: ${sendsPerSession}`);
-      const totalAttemptsCard = createStatCard('Total Attempts', totalAttempts, `Attempts per session: ${attemptsPerSession}`);
-      const totalSendsCard = createStatCard('Total Sends', totalSends, `Completion rate: ${completionRate}`);
+      const totalSessionsCard = createStatCard('Sessions', totalSessions, `Sends per session:<br><strong>${sendsPerSession}</strong>`);
+      const totalAttemptsCard = createStatCard('Attempts', totalAttempts, `Attempts per session:<br><strong>${attemptsPerSession}</strong>`);
+      const totalSendsCard = createStatCard('Sends', totalSends, `Completion rate:<br><strong>${completionRate}</strong>`);
       const totalFlashesOnsightsCard = createStatCard(
         type === 'Bouldering' ? 'Flashes' : 'Onsights',
         totalFlashesOnsights,
-        `Flash ratio: ${flashRatio}`
+        `Flash ratio:<br><strong>${flashRatio}</strong>`
       );
 
       const hardestFlashOnsightGrade = monthlyStats.hardestFlashOnsight[type]
@@ -807,7 +807,7 @@ function updateStatistics() {
         : '-';
 
       const flashOnsightProgression = progressionStats[type].flashOnsightProgression.length > 1
-        ? `Progression: ${progressionStats[type].flashOnsightProgression.join(' → ')}`
+        ? `Progression:<br><strong>${progressionStats[type].flashOnsightProgression.join(' → ')}</strong>`
         : '';
 
       const hardestFlashOnsightCard = createStatCard(
@@ -826,7 +826,7 @@ function updateStatistics() {
         : '-';
 
       const routeProgression = progressionStats[type].hardestGradeProgression.length > 1
-        ? `Progression: ${progressionStats[type].hardestGradeProgression.join(' → ')}`
+        ? `Progression:<br><strong>${progressionStats[type].hardestGradeProgression.join(' → ')}</strong>`
         : '';
 
       const hardestRouteCard = createStatCard(hardestRouteTitle, hardestRouteGrade, routeProgression);
@@ -852,29 +852,38 @@ function updateStatistics() {
     }
   }
 
-  // Helper function to create a stat card
-  function createStatCard(title, value, subtext) {
-    const card = document.createElement('div');
-    card.classList.add('stat-card');
+  // Helper function to create a stat card with formatted subtext
+function createStatCard(title, value, subtext) {
+  const card = document.createElement('div');
+  card.classList.add('stat-card');
 
-    const cardTitle = document.createElement('h3');
-    cardTitle.textContent = title;
-    card.appendChild(cardTitle);
+  const cardTitle = document.createElement('h3');
+  cardTitle.textContent = title;
+  card.appendChild(cardTitle);
 
-    const cardValue = document.createElement('p');
-    cardValue.textContent = value;
-    cardValue.classList.add('stat-value');
-    card.appendChild(cardValue);
+  const cardValue = document.createElement('p');
+  cardValue.textContent = value;
+  cardValue.classList.add('stat-value');
+  card.appendChild(cardValue);
 
-    if (subtext) {
-      const cardSubtext = document.createElement('p');
-      cardSubtext.textContent = subtext;
-      cardSubtext.classList.add('stat-subtext');
-      card.appendChild(cardSubtext);
-    }
-
-    return card;
+  if (subtext) {
+    const cardSubtext = document.createElement('p');
+    // Replace '\n' with '<br>' and wrap the data after the line break in <strong> tags
+    const formattedSubtext = subtext.split('\\n').map((line, index) => {
+      if (index === 0) {
+        return line;
+      } else {
+        return `<br><strong>${line}</strong>`;
+      }
+    }).join('');
+    cardSubtext.innerHTML = formattedSubtext;
+    cardSubtext.classList.add('stat-subtext');
+    card.appendChild(cardSubtext);
   }
+
+  return card;
+}
+
 
   displayStats('Bouldering', boulderingStatsEl);
   displayStats('Sport Climbing', sportClimbingStatsEl);

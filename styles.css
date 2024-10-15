@@ -440,65 +440,125 @@ h3 {
   margin-top: 10px;
 }
 
-.workout-summary-item {
-  padding: 10px;
-  border-bottom: 1px solid #ddd;
+/* Adjusted Workout Summary Card Styles */
+.card {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Reduced shadow */
+  overflow: hidden;
+  width: 100%;
+  margin-bottom: 10px; /* Added margin between cards */
 }
 
-.workout-summary-item:last-child {
-  border-bottom: none;
+.card-content {
+  padding: 12px; /* Reduced padding */
 }
 
-.workout-summary-header {
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px; /* Reduced margin */
+}
+
+.date {
+  color: #4b5563;
+  font-size: 14px; /* Reduced font size */
+}
+
+.icon-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  color: #6b7280;
+  transition: color 0.3s;
+}
+
+.icon-button:hover {
+  color: #2563eb;
+}
+
+.icon-button.delete:hover {
+  color: #dc2626;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px; /* Reduced gap */
+  margin-bottom: 12px; /* Reduced margin */
+}
+
+.stat-item {
+  background-color: white;
+  padding: 8px; /* Reduced padding */
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Reduced shadow */
+  text-align: center;
+}
+
+.stat-label {
+  color: #6b7280;
+  font-size: 12px; /* Reduced font size */
+  font-weight: 500;
+  margin-bottom: 2px; /* Reduced margin */
+}
+
+.stat-value {
+  color: #6b46c1;
+  font-size: 18px; /* Reduced font size */
+  font-weight: bold;
+}
+.card {
+  background-color: #f3f4f6; /* Light gray background */
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Light shadow */
+  overflow: hidden;
+  width: 100%;
+  margin-bottom: 10px; /* Added margin between cards */
+}
+
+.card-content {
+  padding: 12px; /* Reduced padding */
+}
+
+.difficulty-level {
+  border-radius: 8px; /* Rounded corners */
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Small shadow */
+  background-color: #ffffff; /* White background */
+  margin-bottom: 4px; /* Reduced margin */
+}
+
+.difficulty-header {
+  padding: 8px; /* Reduced padding */
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.workout-summary-grades {
-  margin-top: 10px;
+.grade {
+  font-weight: bold;
+  font-size: 14px; /* Reduced font size */
+  /* Color will be set inline based on grade color */
 }
 
-.workout-summary-stats {
-  margin-top: 10px;
-}
-
-.workout-summary-stats p {
-  margin: 5px 0;
-}
-
-.stats-header {
+.difficulty-stats {
   display: flex;
   align-items: center;
-  justify-content: center;
-  color: #6b46c1;
-  margin-bottom: 20px;
-  font-variant: small-caps;
+  gap: 8px; /* Reduced gap */
 }
 
-.stats-header i {
-  margin-right: 8px;
-  font-size: 24px;
+.stat svg {
+  margin-right: 2px; /* Reduced margin */
+  stroke: #6b7280; /* Standard color for icons */
 }
 
-.workout-summary-buttons {
-  display: flex;
-  gap: 10px;
+.stat-text {
+  font-size: 12px; /* Reduced font size */
+  color: #6b7280; /* Standard color for text */
 }
 
-.workout-summary-buttons button {
-  padding: 5px;
-  background-color: #6b46c1;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-variant: small-caps;
-}
-
-.workout-summary-buttons button:hover {
-  background-color: #553c9a;
-}
 
 /* Side Menu Styles */
 .side-menu {
@@ -624,7 +684,6 @@ input:not(:checked) ~ .grading-label:last-of-type {
     font-size: 18px; /* Smaller font size for values */
   }
 
-
   .chart-container {
     height: 400px; /* Increase height for mobile */
   }
@@ -633,5 +692,3 @@ input:not(:checked) ~ .grading-label:last-of-type {
     font-size: 14px;
   }
 }
-
-

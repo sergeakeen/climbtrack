@@ -1375,8 +1375,11 @@ function exportDataToCSV() {
 function importDataFromCSV() {
   const fileInput = document.createElement('input');
   fileInput.type = 'file';
-  // Remove or comment out the accept attribute
-  // fileInput.accept = '.csv';
+  fileInput.accept = '.csv,text/csv';
+  
+  // For Android: Allow both documents and gallery selection
+  fileInput.capture = 'filesystem';
+
   fileInput.addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (file) {

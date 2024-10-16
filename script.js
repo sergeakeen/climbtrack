@@ -1252,6 +1252,7 @@ function calculateProgressionStats() {
 }
 
 // Function to render the grade distribution chart
+// Function to render the grade distribution chart
 function renderGradeDistributionChart(type) {
   const chartId = type === 'Bouldering' ? 'bouldering-grade-chart' : 'sport-climbing-grade-chart';
   const monthlyStats = calculateMonthlyStats(currentMonth.getFullYear(), currentMonth.getMonth());
@@ -1299,6 +1300,19 @@ function renderGradeDistributionChart(type) {
     canvas.chart.destroy();
   }
 
+  // Calculate dynamic bar thickness
+  let barThickness = 15; // Default bar thickness
+  const maxBarThickness = 15; // Maximum bar thickness
+  const minBarThickness = 8; // Minimum bar thickness
+
+  // Adjust bar thickness based on the number of grades
+  if (gradeNames.length > 10) {
+    barThickness = Math.max(minBarThickness, maxBarThickness - (gradeNames.length - 10));
+  }
+
+  // Adjust font size for labels
+  const labelFontSize = gradeNames.length > 15 ? 8 : 10;
+
   // Create stacked bar chart using Chart.js
   canvas.chart = new Chart(ctx, {
     type: 'bar',
@@ -1330,10 +1344,13 @@ function renderGradeDistributionChart(type) {
           ticks: {
             maxRotation: 45,
             minRotation: 0,
-            autoSkip: true,
+            autoSkip: false, // Do not skip labels
             font: {
-              size: 10
+              size: labelFontSize
             }
+          },
+          grid: {
+            display: false
           }
         },
         y: {
@@ -1367,12 +1384,13 @@ function renderGradeDistributionChart(type) {
           top: 20 // Adjust the padding value as needed
         }
       },
-      barThickness: 15,
+      barThickness: barThickness,
       responsive: true,
       maintainAspectRatio: false
     }
   });
 }
+
 
 // Local Storage Functions to save and load workouts
 function saveWorkoutsToStorage() {

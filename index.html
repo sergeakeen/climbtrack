@@ -88,6 +88,10 @@
       <i class="fas fa-file-import menu-icon"></i>
       <span>Import Data</span>
     </div>
+    <div class="menu-item" id="randomizeItem">
+      <i class="fas fa-file-import menu-icon"></i>
+      <span>IRandomize Data</span>
+    </div>
     <div class="menu-item" id="gradeConversionItem">
       <i class="fas fa-chart-bar menu-icon"></i>
       <span>Grade Conversion</span>
@@ -134,7 +138,14 @@
       <button id="add-another-workout-button" class="modal-button">Add Another Session</button>
     </div>
   </div>
-
+  <!-- Conditionally include Cordova script -->
+  <script>
+    if (window.cordova) {
+      var cordovaScript = document.createElement('script');
+      cordovaScript.setAttribute('src', 'cordova.js');
+      document.head.appendChild(cordovaScript);
+    }
+  </script>
   <!-- Include your main script -->
   <script type="module" src="script.js"></script>
 

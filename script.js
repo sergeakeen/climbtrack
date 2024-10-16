@@ -1,6 +1,8 @@
 // script.js
 
 import { grades } from './grades.js';
+// Import the CSV functions
+import { exportDataToCSV, importDataFromCSV } from './csv_functions.js';
 
 // DEV toggle: set to 1 to show import/export menu, 0 to hide
 const DEV = 1; // Default is 1
@@ -78,9 +80,11 @@ document.addEventListener('DOMContentLoaded', () => {
   if (DEV === 1) {
     document.getElementById('exportDataItem').style.display = 'flex';
     document.getElementById('importDataItem').style.display = 'flex';
+    document.getElementById('randomizeItem').style.display = 'flex'; // Add this line
   } else {
     document.getElementById('exportDataItem').style.display = 'none';
     document.getElementById('importDataItem').style.display = 'none';
+    document.getElementById('randomizeItem').style.display = 'none'; // Add this line
   }
 });
 
@@ -243,6 +247,30 @@ function closeModal(modalId) {
   document.getElementById(modalId).style.display = 'none';
 }
 
+function requestStoragePermissions(callback) {
+  if (window.cordova && cordova.plugins.permissions) {
+      var permissions = cordova.plugins.permissions;
+      permissions.hasPermission(permissions.WRITE_EXTERNAL_STORAGE, function(status) {
+          if (status.hasPermission) {
+              callback();
+          } else {
+              permissions.requestPermission(permissions.WRITE_EXTERNAL_STORAGE, function(status) {
+                  if (status.hasPermission) {
+                      callback();
+                  } else {
+                      alert('Storage permission is required to export/import data.');
+                  }
+              }, function() {
+                  alert('Storage permission is required to export/import data.');
+              });
+          }
+      }, null);
+  } else {
+      // No permissions plugin available or not in Cordova
+      callback();
+  }
+}
+
 // Setup Event Listeners for user interactions
 function setupEventListeners() {
   // Close modals when close buttons are clicked
@@ -252,6 +280,13 @@ function setupEventListeners() {
       closeModal(modalId);
     });
   });
+
+ // Randomize Data (DEV only)
+ document.getElementById('randomizeItem').addEventListener('click', () => {
+  generateRandomData();
+  document.getElementById('sideMenu').classList.remove('open');
+});
+
 
   // Workout Type Selection with Single Session per Type per Day
   document.getElementById('select-bouldering').addEventListener('click', () => {
@@ -342,17 +377,32 @@ function setupEventListeners() {
     updateStatistics();
   });
 
-  // Export Data to CSV file
-  document.getElementById('exportDataItem').addEventListener('click', () => {
-    exportDataToCSV();
-    document.getElementById('sideMenu').classList.remove('open');
-  });
+      // Export Data to CSV file
+      document.getElementById('exportDataItem').addEventListener('click', () => {
+        if (window.cordova) {
+            requestStoragePermissions(() => {
+                exportDataToCSV(workouts, grades);
+                document.getElementById('sideMenu').classList.remove('open');
+            });
+        } else {
+            exportDataToCSV(workouts, grades);
+            document.getElementById('sideMenu').classList.remove('open');
+        }
+    });
 
-  // Import Data from CSV file
-  document.getElementById('importDataItem').addEventListener('click', () => {
-    importDataFromCSV();
-    document.getElementById('sideMenu').classList.remove('open');
-  });
+    // Import Data from CSV file
+    document.getElementById('importDataItem').addEventListener('click', () => {
+        if (window.cordova) {
+            requestStoragePermissions(() => {
+                importDataFromCSV(workouts, grades, saveWorkoutsToStorage, renderCalendar, updateStatistics);
+                document.getElementById('sideMenu').classList.remove('open');
+            });
+        } else {
+            importDataFromCSV(workouts, grades, saveWorkoutsToStorage, renderCalendar, updateStatistics);
+            document.getElementById('sideMenu').classList.remove('open');
+        }
+    });
+
 
   // Grade Conversion Menu Item
   document.getElementById('gradeConversionItem').addEventListener('click', () => {
@@ -687,7 +737,7 @@ function showWorkoutSummary() {
 
     const dateDiv = document.createElement('div');
     dateDiv.classList.add('date');
-    dateDiv.textContent = `${workout.type} - ${workout.date.toDateString()}`;
+    dateDiv.innerHTML = `${workout.type} <br> ${workout.date.toDateString()}`;
     headerRow.appendChild(dateDiv);
 
     const buttonContainer = document.createElement('div');
@@ -696,6 +746,7 @@ function showWorkoutSummary() {
     const editButton = document.createElement('button');
     editButton.classList.add('icon-button');
     editButton.innerHTML = `
+      <!-- Edit Icon -->
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
       </svg>
@@ -709,6 +760,7 @@ function showWorkoutSummary() {
     const deleteButton = document.createElement('button');
     deleteButton.classList.add('icon-button', 'delete');
     deleteButton.innerHTML = `
+      <!-- Delete Icon -->
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <polyline points="3 6 5 6 21 6"></polyline>
         <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
@@ -775,6 +827,30 @@ function showWorkoutSummary() {
 
     cardContent.appendChild(statsGrid);
 
+    // Sort the grades from easiest to hardest
+    workout.grades.sort((a, b) => {
+      // Get the grade objects for comparison
+      const gradeObjA = grades.find(
+        g =>
+          g.id === a.gradeId &&
+          g.type === a.type &&
+          g.original.toLowerCase() === a.originalGradingSystem.toLowerCase()
+      );
+      const gradeObjB = grades.find(
+        g =>
+          g.id === b.gradeId &&
+          g.type === b.type &&
+          g.original.toLowerCase() === b.originalGradingSystem.toLowerCase()
+      );
+
+      // Extract grade values, default to 0 if not found
+      const gradeValueA = gradeObjA ? gradeObjA.gradeValue : 0;
+      const gradeValueB = gradeObjB ? gradeObjB.gradeValue : 0;
+
+      // Compare the grade values
+      return gradeValueA - gradeValueB;
+    });
+
     // For each grade, create difficulty-level div
     workout.grades.forEach(grade => {
       const difficultyLevel = document.createElement('div');
@@ -816,9 +892,8 @@ function showWorkoutSummary() {
       const attemptsStat = document.createElement('div');
       attemptsStat.classList.add('stat');
       attemptsStat.innerHTML = `
-        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M8 3h8l-8 20L8 3z"></path>
-        </svg>
+        <!-- Attempts Icon -->
+        <img src="icons/attempt.svg" width="16" height="16" alt="Attempts icon">
         <span class="stat-text">${grade.attempts}</span>
       `;
       difficultyStats.appendChild(attemptsStat);
@@ -827,10 +902,8 @@ function showWorkoutSummary() {
       const sendsStat = document.createElement('div');
       sendsStat.classList.add('stat');
       sendsStat.innerHTML = `
-        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-          <polyline points="22 4 12 14.01 9 11.01"></polyline>
-        </svg>
+        <!-- Sends Icon -->
+        <img src="icons/check.svg" width="16" height="16" alt="Sends icon">
         <span class="stat-text">${grade.sends}</span>
       `;
       difficultyStats.appendChild(sendsStat);
@@ -840,9 +913,8 @@ function showWorkoutSummary() {
         const flashesOnsightsStat = document.createElement('div');
         flashesOnsightsStat.classList.add('stat');
         flashesOnsightsStat.innerHTML = `
-          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-          </svg>
+          <!-- Flashes/Onsights Icon -->
+          <img src="icons/flash.svg" width="16" height="16" alt="Flash icon">
           <span class="stat-text">${grade.flashesOnsights}</span>
         `;
         difficultyStats.appendChild(flashesOnsightsStat);
@@ -870,6 +942,7 @@ function showWorkoutSummary() {
 
   openModal('workout-summary-modal');
 }
+
 
 // Edit Workout by opening the grade selection modal with existing data
 function editWorkout(workout) {
@@ -927,13 +1000,13 @@ function updateStatistics() {
       const attemptsPerSession = (totalAttempts / totalSessions).toFixed(0);
 
       // Create stat cards with calculated data
-      const totalSessionsCard = createStatCard('Sessions', totalSessions, `Sends per session:<br><strong>${sendsPerSession}</strong>`);
+      const totalSessionsCard = createStatCard('Sessions', totalSessions, `Avg. Sends per session:<br><strong>${sendsPerSession}</strong>`);
       const totalAttemptsCard = createStatCard('Attempts', totalAttempts, `Attempts per session:<br><strong>${attemptsPerSession}</strong>`);
       const totalSendsCard = createStatCard('Sends', totalSends, `Completion rate:<br><strong>${completionRate}</strong>`);
       const totalFlashesOnsightsCard = createStatCard(
         type === 'Bouldering' ? 'Flashes' : 'Onsights',
         totalFlashesOnsights,
-        `Flash ratio:<br><strong>${flashRatio}</strong>`
+        `Flash to Send ratio:<br><strong>${flashRatio}</strong>`
       );
 
       const hardestFlashOnsightGrade = monthlyStats.hardestFlashOnsight[type]
@@ -1320,167 +1393,85 @@ function loadWorkoutsFromStorage() {
   }
 }
 
-// Export Data Function to export workouts to CSV file
-function exportDataToCSV() {
-  let csvContent = "data:text/csv;charset=utf-8,";
-  csvContent += "Workout ID,Date,Workout Type,Grade (American),Grade (French),Attempts,Sends,Flashes/Onsights\n"; // Header
 
-  workouts.forEach(workout => {
-    workout.grades.forEach(grade => {
-      // Only include grades with attempts > 0
-      if (grade.attempts > 0) {
-        const gradeObj = grades.find(
-          g => g.id === grade.gradeId && g.original.toLowerCase() === grade.originalGradingSystem.toLowerCase()
-        );
+// Function to generate random data for testing
+function generateRandomData() {
+  // First, clear existing workouts or you can comment this out if you want to keep existing data
+  // workouts = [];
 
-        if (!gradeObj) return; // Skip if gradeObj not found
+  const year = currentMonth.getFullYear();
+  const month = currentMonth.getMonth();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-        let gradeAmerican = '';
-        let gradeFrench = '';
+  // Create an array of day numbers
+  const dayNumbers = Array.from({ length: daysInMonth }, (_, i) => i + 1); // [1, 2, ..., daysInMonth]
 
-        // Set the grade in the original grading system
-        if (grade.originalGradingSystem.toLowerCase() === 'american') {
-          gradeAmerican = gradeObj.american;
-        } else {
-          gradeFrench = gradeObj.french;
-        }
+  // Shuffle the dayNumbers array
+  for (let i = dayNumbers.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [dayNumbers[i], dayNumbers[j]] = [dayNumbers[j], dayNumbers[i]];
+  }
 
-        const row = [
-          workout.id,
-          workout.date.toISOString(),
-          workout.type,
-          gradeAmerican,
-          gradeFrench,
-          grade.attempts,
-          grade.sends,
-          grade.flashesOnsights
-        ];
-        csvContent += row.join(",") + "\n";
+  // Pick the first 10 days
+  const randomDays = dayNumbers.slice(0, 10);
+
+  randomDays.forEach(day => {
+    const date = new Date(year, month, day);
+
+    // Decide randomly whether to have bouldering, sport climbing, or both sessions
+    const sessionTypes = ['Bouldering', 'Sport Climbing'];
+    const numSessions = Math.floor(Math.random() * 2) + 1; // 1 or 2 sessions
+    const sessionTypesForDay = sessionTypes.slice();
+
+    for (let s = 0; s < numSessions; s++) {
+      // Randomly pick a session type
+      const index = Math.floor(Math.random() * sessionTypesForDay.length);
+      const sessionType = sessionTypesForDay.splice(index, 1)[0]; // Remove to avoid duplicate sessions
+
+      // Generate 5 to 10 grades
+      const numGrades = Math.floor(Math.random() * 6) + 5; // 5 to 10 grades
+
+      // Get available grades for the session type
+      const availableGrades = grades.filter(g => g.type === sessionType && g.original.toLowerCase() === gradingSystem.toLowerCase());
+
+      // Shuffle the available grades
+      const shuffledGrades = availableGrades.slice();
+      for (let i = shuffledGrades.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffledGrades[i], shuffledGrades[j]] = [shuffledGrades[j], shuffledGrades[i]];
       }
-    });
-  });
 
-  const encodedUri = encodeURI(csvContent);
-  const link = document.createElement("a");
-  link.setAttribute("href", encodedUri);
-  link.setAttribute("download", "climbing_workouts.csv");
-  document.body.appendChild(link);
+      // Pick the first numGrades grades
+      const selectedGrades = shuffledGrades.slice(0, numGrades);
 
-  link.click(); // Trigger the download
-  document.body.removeChild(link);
-}
+      const gradesData = selectedGrades.map(gradeObj => {
+        // Random send and flash rates
+        const attempts = Math.floor(Math.random() * 5) + 1; // 1 to 5 attempts
+        const sends = Math.floor(Math.random() * (attempts + 1)); // 0 to attempts
+        const flashesOnsights = Math.floor(Math.random() * (sends + 1)); // 0 to sends
 
-// Import Data Function to import workouts from a CSV file
-// Import Data Function
-function importDataFromCSV() {
-  const fileInput = document.createElement('input');
-  fileInput.type = 'file';
-  fileInput.accept = '.csv,text/csv';
-  
-  // For Android: Allow both documents and gallery selection
-  fileInput.capture = 'filesystem';
+        return {
+          gradeId: gradeObj.id,
+          type: gradeObj.type,
+          originalGradingSystem: gradingSystem,
+          attempts: attempts,
+          sends: sends,
+          flashesOnsights: flashesOnsights
+        };
+      });
 
-  fileInput.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      readCSVFile(file);
-    }
-  });
-  fileInput.click();
-}
-
-function readCSVFile(file) {
-  // Check if the selected file is a CSV file based on its name or type
-  const fileName = file.name.toLowerCase();
-  if (!fileName.endsWith('.csv')) {
-    alert('Please select a valid CSV file.');
-    return;
-  }
-
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    const text = e.target.result;
-    parseCSVData(text);
-  };
-  reader.readAsText(file);
-}
-
-function parseCSVData(csvData) {
-  const lines = csvData.split('\n');
-  const headers = lines[0].split(',');
-
-  const newWorkouts = {};
-
-  for (let i = 1; i < lines.length; i++) {
-    if (!lines[i]) continue;
-    const data = lines[i].split(',');
-
-    const workoutId = data[0];
-    const date = new Date(data[1]);
-    const type = data[2];
-    const gradeAmerican = data[3].trim();
-    const gradeFrench = data[4].trim();
-    const attempts = parseInt(data[5]) || 0;
-    const sends = parseInt(data[6]) || 0;
-    const flashesOnsights = parseInt(data[7]) || 0;
-
-    let originalGradingSystem = '';
-    let gradeObj = null;
-
-    if (gradeAmerican && !gradeFrench) {
-      originalGradingSystem = 'american';
-      gradeObj = grades.find(
-        g => g.american === gradeAmerican && g.original.toLowerCase() === originalGradingSystem && g.type === type
-      );
-    } else if (gradeFrench && !gradeAmerican) {
-      originalGradingSystem = 'french';
-      gradeObj = grades.find(
-        g => g.french === gradeFrench && g.original.toLowerCase() === originalGradingSystem && g.type === type
-      );
-    } else {
-      // Skip if both or neither grades are provided
-      continue;
-    }
-
-    if (!gradeObj) continue; // Skip if grade not found
-
-    if (!newWorkouts[workoutId]) {
-      newWorkouts[workoutId] = {
-        id: workoutId,
+      const workout = {
+        id: Date.now().toString() + Math.random().toString(36).substr(2, 9), // Unique ID
         date: date,
-        type: type,
-        grades: []
+        type: sessionType,
+        grades: gradesData
       };
-    }
 
-    newWorkouts[workoutId].grades.push({
-      gradeId: gradeObj.id,
-      type: gradeObj.type,
-      originalGradingSystem: originalGradingSystem,
-      attempts: attempts,
-      sends: sends,
-      flashesOnsights: flashesOnsights
-    });
-  }
-
-  // Merge imported workouts with existing workouts
-  const importedWorkouts = Object.values(newWorkouts);
-
-  // Merge workouts with the same ID
-  importedWorkouts.forEach(importedWorkout => {
-    const existingWorkoutIndex = workouts.findIndex(w => w.id === importedWorkout.id);
-    if (existingWorkoutIndex !== -1) {
-      // Merge grades
-      const existingWorkout = workouts[existingWorkoutIndex];
-      existingWorkout.grades = existingWorkout.grades.concat(importedWorkout.grades);
-      workouts[existingWorkoutIndex] = existingWorkout;
-    } else {
-      workouts.push(importedWorkout);
+      workouts.push(workout);
     }
   });
 
   saveWorkoutsToStorage();
   renderCalendar();
   updateStatistics();
-  alert('Data imported successfully!');
 }

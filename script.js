@@ -994,19 +994,19 @@ function updateStatistics() {
       const totalSends = monthlyStats[type].totalSends;
       const totalFlashesOnsights = monthlyStats[type].totalFlashesOnsights;
 
-      const completionRate = ((totalSends / totalAttempts) * 100).toFixed(0) + '%';
+      const completionRate = (((totalSends + totalFlashesOnsights) / totalAttempts) * 100).toFixed(0) + '%';
       const flashRatio = totalSends > 0 ? ((totalFlashesOnsights / totalSends) * 100).toFixed(0) + '%' : '0%';
       const sendsPerSession = (totalSends / totalSessions).toFixed(0);
       const attemptsPerSession = (totalAttempts / totalSessions).toFixed(0);
 
       // Create stat cards with calculated data
-      const totalSessionsCard = createStatCard('Sessions', totalSessions, `Avg. Sends per session:<br><strong>${sendsPerSession}</strong>`);
-      const totalAttemptsCard = createStatCard('Attempts', totalAttempts, `Attempts per session:<br><strong>${attemptsPerSession}</strong>`);
-      const totalSendsCard = createStatCard('Sends', totalSends, `Completion rate:<br><strong>${completionRate}</strong>`);
+      const totalSessionsCard = createStatCard('Sessions', totalSessions, `Avg. attempts per session:<br><strong>${attemptsPerSession}</strong>`);
+      const totalAttemptsCard = createStatCard('Attempts', totalAttempts, `Completion rate:<br><strong>${completionRate}</strong>`);
+      const totalSendsCard = createStatCard('Sends', totalSends, `Avg. per session:<br><strong>${sendsPerSession}</strong>`);
       const totalFlashesOnsightsCard = createStatCard(
         type === 'Bouldering' ? 'Flashes' : 'Onsights',
         totalFlashesOnsights,
-        `Flash to Send ratio:<br><strong>${flashRatio}</strong>`
+        `${type === 'Bouldering' ? 'Flash' : 'Onsight'} to send ratio:<br><strong>${flashRatio}</strong>`
       );
 
       const hardestFlashOnsightGrade = monthlyStats.hardestFlashOnsight[type]

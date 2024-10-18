@@ -2,7 +2,7 @@
     "name": "Climbing Workout Tracker",
     "short_name": "ClimbTracker",
     "start_url": "https://sergeakeen.github.io/climbtrack/",
-    "display": "standalone",
+    "display": "fullscreen",
     "background_color": "#ffffff",
     "theme_color": "#6b46c1",
     "orientation": "portrait",

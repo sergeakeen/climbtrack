@@ -10,6 +10,12 @@ const DEV = 1; // Default is 1
 // Grading system preference: default to 'French' grading system
 let gradingSystem = 'French'; // Default to French
 
+document.addEventListener('deviceready', function() {
+  // Call your export function here
+  exportDataToCSV();
+}, false);
+
+
 // Load Grading System Preference from local storage
 function loadGradingSystemPreference() {
   const storedPreference = localStorage.getItem('gradingSystem');
@@ -250,13 +256,16 @@ function closeModal(modalId) {
 function requestStoragePermissions(callback) {
   if (window.cordova && cordova.plugins.permissions) {
       var permissions = cordova.plugins.permissions;
+
+      // Check for WRITE_EXTERNAL_STORAGE permission
       permissions.hasPermission(permissions.WRITE_EXTERNAL_STORAGE, function(status) {
-          if (status.hasPermission) {
-              callback();
+          if (status && status.hasPermission) {
+              callback(); // Permission granted
           } else {
-              permissions.requestPermission(permissions.WRITE_EXTERNAL_STORAGE, function(status) {
-                  if (status.hasPermission) {
-                      callback();
+              // Request both WRITE and READ permissions
+              permissions.requestPermissions([permissions.WRITE_EXTERNAL_STORAGE, permissions.READ_EXTERNAL_STORAGE], function(status) {
+                  if (status && status.hasPermission) {
+                      callback(); // Permission granted
                   } else {
                       alert('Storage permission is required to export/import data.');
                   }
@@ -264,12 +273,16 @@ function requestStoragePermissions(callback) {
                   alert('Storage permission is required to export/import data.');
               });
           }
-      }, null);
+      }, function(error) {
+          console.error("Failed to check storage permission: ", error);
+          alert('Failed to check storage permission.');
+      });
   } else {
-      // No permissions plugin available or not in Cordova
+      // Not in Cordova or permissions plugin is not available, continue with web fallback
       callback();
   }
 }
+
 
 // Setup Event Listeners for user interactions
 function setupEventListeners() {

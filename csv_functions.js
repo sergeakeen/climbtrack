@@ -68,57 +68,75 @@ export async function importDataFromCSV(workouts, grades, saveWorkoutsToStorage,
     }
 }
 
-// Helper function for Cordova export
 function cordovaExportCSV(csvContent) {
     return new Promise((resolve, reject) => {
+        function proceed() {
+            console.log("Starting CSV export process");
+            
+            // Request permissions
+            const permissions = cordova.plugins.permissions;
+            permissions.requestPermissions(
+                [
+                    permissions.WRITE_EXTERNAL_STORAGE,
+                    permissions.READ_EXTERNAL_STORAGE
+                ],
+                function(status) {
+                    if(!status.hasPermission) {
+                        reject(new Error("Storage permission is not turned on"));
+                        return;
+                    }
+                    
+                    console.log("Permissions granted, accessing file system");
+                    // Access the app's data directory
+                    window.resolveLocalFileSystemURL(cordova.file.externalDataDirectory || cordova.file.dataDirectory, function(dirEntry) {
+                        console.log("File system accessed, creating file");
+                        // Create or overwrite the CSV file
+                        dirEntry.getFile("climbing_workouts.csv", { create: true, exclusive: false }, function (fileEntry) {
+                            console.log("File created, writing content");
+                            // Create a FileWriter object for the file
+                            fileEntry.createWriter(function (fileWriter) {
+                                fileWriter.onwriteend = function() {
+                                    console.log("File written successfully");
+                                    resolve(fileEntry.nativeURL);
+                                };
+                                fileWriter.onerror = function(e) {
+                                    console.error("File write failed:", e);
+                                    reject(new Error('File write failed: ' + JSON.stringify(e)));
+                                };
+                                var blob = new Blob([csvContent], { type: 'text/csv' });
+                                fileWriter.write(blob);
+                            }, function(e) {
+                                console.error("Failed to create FileWriter:", e);
+                                reject(new Error('Failed to create FileWriter: ' + JSON.stringify(e)));
+                            });
+                        }, function(e) {
+                            console.error("Failed to create file:", e);
+                            reject(new Error('Failed to create file: ' + JSON.stringify(e)));
+                        });
+                    }, function(e) {
+                        console.error("Failed to access file system:", e);
+                        reject(new Error('Failed to access file system: ' + JSON.stringify(e)));
+                    });
+                },
+                function(error) {
+                    console.error("Error requesting permissions:", error);
+                    reject(new Error('Error requesting permissions: ' + JSON.stringify(error)));
+                }
+            );
+        }
+
         // Ensure Cordova is ready
         if (document.readyState === 'complete') {
             proceed();
         } else {
             document.addEventListener('deviceready', proceed, false);
         }
-
-        function proceed() {
-            // Access the app's data directory
-            window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function(dirEntry) {
-                // Create or overwrite the CSV file
-                dirEntry.getFile("climbing_workouts.csv", { create: true, exclusive: false }, function (fileEntry) {
-                    // Create a FileWriter object for the file
-                    fileEntry.createWriter(function (fileWriter) {
-                        fileWriter.onwriteend = function() {
-                            // Share the file using Social Sharing plugin
-                            window.plugins.socialsharing.share(
-                                'Here is my climbing workouts data.',
-                                'Climbing Workouts Data',
-                                fileEntry.toURL(),
-                                null,
-                                function() {
-                                    // Success callback
-                                    resolve();
-                                },
-                                function(error) {
-                                    // Error callback
-                                    reject(new Error('Sharing failed: ' + error));
-                                }
-                            );
-                        };
-                        fileWriter.onerror = function(e) {
-                            reject(new Error('File write failed: ' + e.toString()));
-                        };
-                        var blob = new Blob([csvContent], { type: 'text/csv' });
-                        fileWriter.write(blob);
-                    }, function(e) {
-                        reject(new Error('Failed to write file: ' + e.toString()));
-                    });
-                }, function(e) {
-                    reject(new Error('Failed to create file: ' + e.toString()));
-                });
-            }, function(e) {
-                reject(new Error('Failed to access file system: ' + e.toString()));
-            });
-        }
     });
 }
+
+
+
+
 
 // Helper function for Cordova import
 function cordovaImportCSV() {
